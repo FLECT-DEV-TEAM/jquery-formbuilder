@@ -1,0 +1,51 @@
+{
+	items: {
+		id: {
+			type: "text",
+			rules: {
+				required: true,
+				digits: true,
+				minlength: 3,
+				maxlength: 10
+			}
+		},
+		id2: {
+			label : "ID",
+			type: "text",
+			required: true,
+			digits: true,
+			minlength: 3,
+			maxlength: 10
+		},
+		name2: {
+			label : "名前",
+			type: "text",
+			rules: {
+				required: true
+			}
+		},
+		birthday: {
+			type: "date"
+		},
+		test: "text",
+		checkbox1: {
+			label : "チェックボックス1",
+			type: "checkbox",
+			value: "hoge",
+			required: true
+		},
+		checkbox2: {
+			label : "チェックボックス2",
+			type: "checkbox",
+			required: true
+		}
+  	},
+  	validateOptions: {
+		onsubmit: true,
+		messages: {
+			checkbox2: {
+				required: "いいからチェックしろ"
+			}
+		}
+	}
+}
