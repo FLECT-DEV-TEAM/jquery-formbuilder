@@ -101,7 +101,9 @@
 		//type=dateを指定した場合はjQueryUIのdatepickerが適用され日付のエラーチェックが行われます。
 		"birthday": {
 			"label": "誕生日",
-			"type": "date"
+			"type": "date",
+			"min" : "2000-01-01",
+			"max" : "2013-07-20"
 		},
 		//ミニマムではこういう省略表記も可能です。
 		//type="text"に展開されます。
@@ -109,7 +111,8 @@
 		"部署名": {
 			"label" : "部署名",
 			"type" : "text",
-			"maxlength" : 20
+			"maxlength" : 20,
+			"requiredIf" : "会社!=''"
 		},
 		//selectの場合はvaluesに配列でoptionを指定します。
 		//valuesの書き方は正表記と略表記の2種類あります。
@@ -196,6 +199,18 @@
 				{ "value": "6", "text": "1年以下", "disabled" : true}
 			]
 		},
+		"tel1" : {
+			"label" : "電話",
+			"tel" : true
+		},
+		"tel2" : {
+			"label" : "携帯電話",
+			"tel" : true
+		},
+		"tel3" : {
+			"label" : "会社電話",
+			"tel" : true
+		},
 		//テキストエリア
 		"text": {
 			"label": "説明",
@@ -225,6 +240,9 @@
 			"type" : "hidden",
 			"value" : "test"
 		}
+	},
+	"rules" : {
+		"requiredOne": "tel1,tel2,tel3"
 	},
 	"validateOptions": {
 		"messages": {

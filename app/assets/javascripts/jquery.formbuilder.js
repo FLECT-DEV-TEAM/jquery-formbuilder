@@ -38,15 +38,18 @@ var defaults = {
 
 	//電話番号（例:010-2345-6789）
 	$.validator.addMethod("tel", function(value, element) {
-	return this.optional(element) || /^[0-9-]{10,13}$/.test(value);
-	}, "電話番号を入力してください（例:012-345-6789）"
-);
+		return this.optional(element) || /^[0-9-]{10,13}$/.test(value);
+	}, "電話番号を入力してください（例:012-345-6789）");
+	
+	//複数項目のいずれかが必須
+	$.validator.messages.requiredOne = "{0}のいずれかは必須です";
 	
 })();
 /*
 options - Settings for formbuilder.
   dateFormat - Format for date type field.
   labelWidth - Width for field label
+  rules - rules for relational items
   validateOptions - Options for jquery.validate
 resources - Localized messages for labels and messages.
 */
@@ -54,9 +57,81 @@ $.fn.formbuilder = function(options, resources) {
 	var $form = $(this),
 		$ul = $("<ul class='formbuilder-form'></ul>"),
 		rules = {},
-		idPrefix = options.idPrefix || "";
+		idPrefix = options.idPrefix || "",
+		validateOptions = $.extend(true, {}, options.validateOptions),
+		validator = null;
+	
+	
+	if (!validateOptions.errorPlacement) {
+		validateOptions.errorPlacement = errorPlacement;
+	}
 	$form.prepend($ul);
 	
+	//Context for user defined function
+	var context = {
+		getId: function(name) {
+			return $form.find(":input[name=" + name + "]").attr("id");
+		},
+		getValue: function(name) {
+			var $input = $form.find(":input[name=" + name + "]");
+			if ($input.length == 0) {
+				return null;
+			}
+			switch ($input.attr("type")) {
+				case "checkbox":
+				case "radio":
+					var $checked = $input.filter(":checked");
+					if ($checked.length == 1) {
+						return $checked.val();
+					} else if ($checked.length > 1) {
+						var ret = [];
+						$checked.each(function() {
+							ret.push($(this).val());
+						});
+						return ret;
+					} else {
+						return null;
+					}
+				default:
+					return $input.val();
+			}
+		},
+		isEmpty: function(name) {
+			return !this.getValue(name);
+		},
+		isChecked: function(name, value) {
+			if (value) {
+				var checked = this.gtValue(name);
+				if ($.isArray(checked)) {
+					$.inArray(value, checked);
+				} else {
+					return checked == value;
+				}
+			} else {
+				return !this.isEmpty(name);
+			}
+		},
+		getLabel: function(name) {
+			if (!options.items || !options.items[name]) {
+				return name;
+			}
+			var ret = options.items[name].label;
+			if (ret.indexOf("<") != -1) {
+				ret = ret.substring(0, ret.indexOf("<"));
+			}
+			return ret;
+		}
+	};
+	function getValidateOptionsHolder(key) {
+		if (!validateOptions[key]) {
+			validateOptions[key] = {};
+		}
+		return validateOptions[key];
+	}
+	function requiredIf(expr) {
+		//ToDo
+		return true;
+	}
 	function warn(msg) {
 		console.log("warn: " + msg);
 	}
@@ -91,6 +166,8 @@ $.fn.formbuilder = function(options, resources) {
 			case "list":
 			case "placeholder":
 				return "attrs";
+			case "requiredIf":
+				return "rules";
 		}
 		for (var name in $.validator.methods) {
 			if (name == key) {
@@ -101,12 +178,8 @@ $.fn.formbuilder = function(options, resources) {
 	}
 	
 	function errorPlacement(label, element) {
-		var type = element.attr("type");
-		if (type == "checkbox" || type == "radio") {
-			label.insertAfter(element.parent().get(0));
-		} else {
-			label.insertAfter(element);
-		}
+		var li = element.parent("li").get(0);
+		$(li).append(label);
 	}
 	function normalizeItem(key, values) {
 		if (!values.label) {
@@ -137,6 +210,21 @@ $.fn.formbuilder = function(options, resources) {
 				value = value.substring(1);
 			}
 			rules.equalTo = "#" + getId("input", value)
+		}
+		if (rules.requiredIf) {
+			if ($.isFunction(rules.requiredIf)) {
+				var func = rules.requiredIf;
+				delete rules.requiredIf;
+				rules.required = function() {
+					return func(context);
+				}
+			} else {
+				var expr = rules.requiredIf;
+				delete rules.requiredIf;
+				rules.required = function() {
+					return requiredIf(expr);
+				}
+			}
 		}
 	}
 	function normalizeOptions(options) {
@@ -258,7 +346,6 @@ $.fn.formbuilder = function(options, resources) {
 			}
 		}
 		normalizeItem(key, values);
-console.log(JSON.stringify(values));
 		var type = values.type,
 			$input = null,
 			$target = null;
@@ -284,10 +371,22 @@ console.log(JSON.stringify(values));
 					type: "text"
 				})
 				setAttrs($input, values.attrs);
-				var dateFormat = options.dateFormat || defaults.dateFormat;
-				$input.datepicker({
-					dateFormat: dateFormat
-				});
+				var dateOptions = {
+					dateFormat: options.dateFormat || defaults.dateFormat,
+					onSelect: function() {
+						if (validator) {
+							validator.element("#" + context.getId(key));
+						}
+					}
+				}
+				if (values.rules.min) {
+					dateOptions.minDate = values.rules.min;
+				}
+				if (values.rules.max) {
+					dateOptions.maxDate = values.rules.max;
+				}
+				
+				$input.datepicker(dateOptions);
 				values.rules.date = true;
 				break;
 			case "checkbox":
@@ -349,21 +448,89 @@ console.log(JSON.stringify(values));
 				$li.append($label);
 			}
 			$li.append($target ? $target : $input);
-			if (values.rules) {
+			if (values.rules && !$.isEmptyObject(values.rules)) {
 				rules[key] = values.rules;
 			}
+			if (values.follow) {
+				var group = getValidateOptionsHolder("groups"),
+					gname = "",
+					gvalue = "";
+				$li.find(":input").each(function() {
+					if (gname.length > 0) {
+						gname += "_";
+						gvalue += " ";
+					}
+					var name = $(this).attr("name");
+					gname += name;
+					gvalue += name;
+				});
+				group[gname] = gvalue;
+			}
+		}
+	}
+	function requiredOne(names) {
+		if (typeof(names) === "string") {
+			names = names.split(",");
+		}
+		var group = getValidateOptionsHolder("groups"),
+			gname = "",
+			gvalue = "",
+			labels = "";
+		$.each(names, function(index, key) {
+			if (labels.length > 0) {
+				labels += ", ";
+				gname += "_";
+				gvalue += " ";
+			}
+			labels += context.getLabel(key);
+			gname += key;
+			gvalue += key;
+			
+			if (!rules[key]) {
+				rules[key] = {};
+			}
+			rules[key].required = function() {
+				for (var i=0; i<names.length; i++) {
+					if (names[i] == key) {
+						continue;
+					}
+					if (!context.isEmpty(names[i])) {
+						return false;
+					}
+				}
+				return true;
+			}
+		});
+		var msg = $.validator.format($.validator.messages.requiredOne, labels);
+		$.each(names, function(index, name) {
+			var messages = getValidateOptionsHolder("messages");
+			if (!messages[name]) {
+				messages[name] = {};
+			}
+			messages[name]["required"] = msg;
+		});
+		group[gname] = gvalue;
+	}
+	function buildRelationalRules(key, values) {
+		switch (key) {
+			case "requiredOne":
+				requiredOne(values);
+				break;
+			default:
+				if ($.isFunction(values)) {
+					//ToDo
+				}
 		}
 	}
 	if (options.items) {
 		$.each(options.items, buildForm);
 	}
+	if (options.rules) {
+		$.each(options.rules, buildRelationalRules);
+	}
 	if ($.fn.validate && rules) {
-		var validateOptions = $.extend(true, {}, options.validateOptions);
 		validateOptions.rules = rules;
-		if (!validateOptions.errorPlacement) {
-			validateOptions.errorPlacement = errorPlacement;
-		}
-		$form.validate(validateOptions);
+		validator = $form.validate(validateOptions);
 	}
 }
 })(jQuery);
