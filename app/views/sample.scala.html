@@ -10,20 +10,50 @@
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("javascripts/ext/bootstrap/css/bootstrap.css")">
 <script src="@routes.Assets.at("javascripts/ext/bootstrap/js/bootstrap.js")" type="text/javascript"></script>
 }
+<script src="@routes.Assets.at("javascripts/ext/ace/src/ace.js")" type="text/javascript" charset="utf-8"></script>
+<style>
+#bootstrap-control {
+	margin-bottom: 10px;
+}
+
+#editor-pane {
+	float: left;
+	margin-right: 30px;
+	margin-left: 10px;
+	background-color: #b0c4de;
+	height: 100%;
+	padding: 0 0 10px 5px;
+}
+#form-pane {
+	display: inline-block;
+	background-color: #ffefd5;
+	padding: 0 10px 10px 5px;
+}
+#editor { 
+	width: 600px;
+	height: 400px;
+	margin-bottom: 10px;
+}
+
+</style>
 <script>
 $(function() {
 	var initialData = @Html(Include("app/data/sampleForm.json").replaceAll("//.*\n", "\n")),
 		$form = $("#sampleForm"),
-		json = $("#json").val();
+	    editor = ace.edit("editor"),
+		json = editor.getValue();
+	
+	editor.setTheme("ace/theme/idle_fingers");
+	editor.getSession().setMode("ace/mode/json");
+	editor.getSession().setTabSize(2);
 	
 	$form.formbuilder(initialData);
 	$("#test").click(function() {
-		var text = $("#json").val();
+		var text = editor.getValue();
 		if (json != text) {
 			var obj = null;
 			text = text.replace(/\/\/.*\n/g, "\n")
 			try {
-console.log("test: " + text);
 				obj = JSON.parse(text);
 			} catch (e) {
 				alert("parse error: " + ("" + e).substring(0, 20) + "...");
@@ -32,7 +62,6 @@ console.log("test: " + text);
 			if (obj) {
 				$.removeData($form[0], "validator");
 				$form.empty().formbuilder(obj);
-				$("#message").empty();
 			}
 			json = text;
 		}
@@ -44,23 +73,28 @@ console.log("test: " + text);
 	});
 });
 </script>
-<div class="container">
+<div>
 <h1>Form Generator</h1>
-	<div>
-		<a href="/sample?bootstrap=@(!bootstrap)">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
+	<div id="bootstrap-control">
+		<a class="btn btn-warning" href="/sample?bootstrap=@(!bootstrap)">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
 	</div>
-	<div style="float:left;">
-		<form id="sampleForm" action="#">
-		</form>
-		<button id="submit" class="btn btn-primary">実行</button>
-	</div>    
-	<div style="float:right;">
-		<div>
-			←が↓の定義から作られます。
-		</div>
-		<textarea id="json" rows="40" cols="60" class="input-xlarge">@Include("app/data/sampleForm.json").replaceAll("\t", "  ")</textarea>
+	<div id="editor-pane">
+		<h3>JSON定義</h3>
+		<p>
+		下の定義を編集して右のフォームを変更できます。
+		</p>
+		<p>
+		(JSONには本来コメントはありませんが、下のエディタ内では使用できます。)
+		</p>
+		<div id="editor">@Include("app/data/sampleForm.json")</div>
 		<div>
 			<button id="test" class="btn btn-primary">生成</button>
 		</div>
 	</div>
+	<div id="form-pane">
+		<h3>フォーム</h3>
+		<form id="sampleForm" action="#">
+		</form>
+		<button id="submit" class="btn btn-primary">チェック</button>
+	</div>    
 </div>}

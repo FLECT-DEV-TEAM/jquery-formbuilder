@@ -4,6 +4,45 @@
 var defaults = {
 	dateFormat: "yy-mm-dd"
 };
+
+(function addValidateMethods() {
+	//全角ひらがなのみ
+	$.validator.addMethod("hiragana", function(value, element) {
+		return this.optional(element) || /^([ぁ-ん]+)$/.test(value);
+	}, "全角ひらがなを入力してください");
+
+	//全角カタカナのみ
+	$.validator.addMethod("katakana", function(value, element) {
+		return this.optional(element) || /^([ァ-ヶー]+)$/.test(value);
+	}, "全角カタカナを入力してください");
+
+	//半角カタカナのみ
+	$.validator.addMethod("hankana", function(value, element) {
+		return this.optional(element) || /^([ｧ-ﾝﾞﾟ]+)$/.test(value);
+	}, "半角カタカナを入力してください");
+
+	//半角アルファベット（大文字･小文字）のみ
+	$.validator.addMethod("alpha", function(value, element) {
+		return this.optional(element) || /^([a-zA-z¥s]+)$/.test(value);
+	}, "半角英字を入力してください");
+
+	//半角アルファベット（大文字･小文字）もしくは数字のみ
+	$.validator.addMethod("alphanum", function(value, element) {
+		return this.optional(element) || /^([a-zA-Z0-9]+)$/.test(value);
+	}, "半角英数字を入力してください");
+	
+	//郵便番号（例:012-3456）
+	$.validator.addMethod("postcode", function(value, element) {
+		return this.optional(element) || /^¥d{3}¥-¥d{4}$/.test(value);
+	}, "郵便番号を入力してください（例:123-4567）");
+
+	//電話番号（例:010-2345-6789）
+	$.validator.addMethod("tel", function(value, element) {
+	return this.optional(element) || /^[0-9-]{10,13}$/.test(value);
+	}, "電話番号を入力してください（例:012-345-6789）"
+);
+	
+})();
 /*
 options - Settings for formbuilder.
   dateFormat - Format for date type field.
@@ -41,24 +80,6 @@ $.fn.formbuilder = function(options, resources) {
 			case "selected":
 			case "checked":
 				return "top";
-			case "required":
-			case "remote":
-			case "minlength":
-			case "maxlength":
-			case "rangelength":
-			case "min":
-			case "max":
-			case "range":
-			case "email":
-			case "url":
-			case "date":
-			case "dateISO":
-			case "number":
-			case "digits":
-			case "creditcard":
-			case "accept":
-			case "equalTo":
-				return "rules";
 			case "class":
 			case "value":
 			case "size":
@@ -70,10 +91,15 @@ $.fn.formbuilder = function(options, resources) {
 			case "list":
 			case "placeholder":
 				return "attrs";
-			default:
-				return "top";
 		}
+		for (var name in $.validator.methods) {
+			if (name == key) {
+				return "rules";
+			}
+		}
+		return "top";
 	}
+	
 	function errorPlacement(label, element) {
 		var type = element.attr("type");
 		if (type == "checkbox" || type == "radio") {
@@ -116,35 +142,30 @@ $.fn.formbuilder = function(options, resources) {
 	function normalizeOptions(options) {
 		var ret = [];
 		for (var i=0; i<options.length; i++) {
-			var op = options[i],
-				text = null,
-				value = null;
+			var op = options[i];
 			
 			if (typeof(op) == "object") {
-				if ($.isArray(op)) {
-					value = op[0];
-					if (op.length > 1) {
-						text = op[1];
-					} else {
-						text = value;
-					}
-				} else {
-					value = op.value;
-					text = op.text || value;
+				if (!op.text) {
+					op.text = op.value;
 				}
+				ret.push(op);
 			} else {
 				op = "" + op;
-				var idx = op.indexOf(":");
+				var idx = op.indexOf(":"),
+					text = null,
+					value = null;
 				if (idx == -1) {
+					value = op;
+					text = op;
 				} else {
 					value = op.substring(0, idx);
 					text = op.substring(idx+1);
 				}
+				ret.push({
+					value: value,
+					text: text
+				});
 			}
-			ret.push({
-				value: value,
-				text: text
-			});
 		}
 		return ret;
 	}
@@ -162,17 +183,35 @@ $.fn.formbuilder = function(options, resources) {
 	}
 	function buildSelect($select, options) {
 		options = normalizeOptions(options);
+		var $group = null;
 		for (var i=0; i<options.length; i++) {
 			var op = options[i],
 				$op = $("<option/>");
 			$op.attr("value", op.value);
 			$op.text(op.text);
-			$select.append($op);
+			if (op.selected) {
+				$op.attr("selected", "selected");
+			}
+			if (op.disabled) {
+				$op.attr("disabled", "disabled");
+			}
+			if (op.group) {
+				if ($group == null || $group.attr("label") != op.group) {
+					$group = $("<optGroup/>");
+					$group.attr("label", op.group);
+					$select.append($group);
+				}
+			}
+			if ($group) {
+				$group.append($op);
+			} else {
+				$select.append($op);
+			}
 		}
 	}
 	function buildCheckboxOrRadio(key, type, options) {
 		options = normalizeOptions(options);
-		var $span = $("<span/>");
+		var $span = $("<span style='display:inline-block;'/>");
 		for (var i=0; i<options.length; i++) {
 			var op = options[i],
 				$input = $("<input/>");
@@ -182,6 +221,15 @@ $.fn.formbuilder = function(options, resources) {
 				type : type,
 				value : op.value
 			});
+			if (op.checked) {
+				$input.attr("checked", "checked");
+			}
+			if (op.disabled) {
+				$input.attr("disabled", "disabled");
+			}
+			if (op["break"]) {
+				$span.append("<br/>");
+			}
 			$span.append($input);
 			if (op.text) {
 				var $label = $("<label/>");
@@ -210,6 +258,7 @@ $.fn.formbuilder = function(options, resources) {
 			}
 		}
 		normalizeItem(key, values);
+console.log(JSON.stringify(values));
 		var type = values.type,
 			$input = null,
 			$target = null;
@@ -259,12 +308,10 @@ $.fn.formbuilder = function(options, resources) {
 					name: key,
 					id: getId("input", key)
 				});
-				buildSelect($input, values.values);
 				setAttrs($input, values.attrs);
+				buildSelect($input, values.values);
 				if (values.selected) {
 					setSelected($input.find("option"), values.selected, "selected");
-				} else {
-					$input.find("option:first").attr("selected", "selected");
 				}
 				break;
 			case "textarea":
