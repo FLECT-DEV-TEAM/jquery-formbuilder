@@ -1,23 +1,66 @@
-@(message: String)
+@(bootstrap: Boolean)
 @import jp.co.flect.play2.tags.Include
 
-@base("Sample") {
+@base("Form Generator") {
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/jquery.formbuilder.css")">
 <script src="@routes.Assets.at("javascripts/ext/validation/jquery.validate.js")" type="text/javascript"></script>
 <script src="@routes.Assets.at("javascripts/ext/validation/localization/messages_ja.js")" type="text/javascript"></script>
 <script src="@routes.Assets.at("javascripts/jquery.formbuilder.js")" type="text/javascript"></script>
+@if(bootstrap) {
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("javascripts/ext/bootstrap/css/bootstrap.css")">
+<script src="@routes.Assets.at("javascripts/ext/bootstrap/js/bootstrap.js")" type="text/javascript"></script>
+}
 <script>
 $(function() {
-	var sampleForm = @Html(Include("app/data/sampleForm.json"))
-	$("#sampleForm").formbuilder(sampleForm, {
-		"birthday" : "誕生日"
+	var initialData = @Html(Include("app/data/sampleForm.json").replaceAll("//.*\n", "\n")),
+		$form = $("#sampleForm"),
+		json = $("#json").val();
+	
+	$form.formbuilder(initialData);
+	$("#test").click(function() {
+		var text = $("#json").val();
+		if (json != text) {
+			var obj = null;
+			text = text.replace(/\/\/.*\n/g, "\n")
+			try {
+console.log("test: " + text);
+				obj = JSON.parse(text);
+			} catch (e) {
+				alert("parse error: " + ("" + e).substring(0, 20) + "...");
+				throw e;
+			}
+			if (obj) {
+				$.removeData($form[0], "validator");
+				$form.empty().formbuilder(obj);
+				$("#message").empty();
+			}
+			json = text;
+		}
+	});
+	$("#submit").click(function() {
+		if ($form.validate().form()) {
+			alert("エラーはありません");
+		}
 	});
 });
 </script>
-<h1>Sample</h1>
-<div>
-<form id="sampleForm" action="#">
-<input type="submit" value="Execute">
-</form>
-</div>    
-}
+<div class="container">
+<h1>Form Generator</h1>
+	<div>
+		<a href="/sample?bootstrap=@(!bootstrap)">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
+	</div>
+	<div style="float:left;">
+		<form id="sampleForm" action="#">
+		</form>
+		<button id="submit" class="btn btn-primary">実行</button>
+	</div>    
+	<div style="float:right;">
+		<div>
+			←が↓の定義から作られます。
+		</div>
+		<textarea id="json" rows="40" cols="60" class="input-xlarge">@Include("app/data/sampleForm.json").replaceAll("\t", "  ")</textarea>
+		<div>
+			<button id="test" class="btn btn-primary">生成</button>
+		</div>
+	</div>
+</div>}

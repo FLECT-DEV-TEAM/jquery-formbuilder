@@ -9,7 +9,8 @@ object Application extends Controller {
     Ok(views.html.index("Your new application is ready."))
   }
 
-  def sample = Action {
-    Ok(views.html.sample("Sample"));
+  def sample = Action { implicit request =>
+    val bootstrap = request.getQueryString("bootstrap").getOrElse("true").toBoolean;
+    Ok(views.html.sample(bootstrap));
   }
 }

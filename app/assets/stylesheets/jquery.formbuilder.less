@@ -2,14 +2,28 @@ ul.formbuilder-form {
 	list-style: none;
 	
 	li {
+		margin-top: 10px;
 		label.form-label {
 			display: inline-block;
 			width: 120px;
+			vertical-align: top;
+		}
+		label.form-label-follow {
+			display: inline-block;
+			width: 80px;
+			vertical-align: top;
+			margin-left: 20px;
 		}
 		label.error {
 			margin-left: 5px;
 			color: #FF0000;
 			font-style: italic;
+		}
+		label {
+			display: inline;
+		}
+		input + label {
+			margin: 0 10px 0 2px;
 		}
 	}
 }
