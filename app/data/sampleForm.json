@@ -37,7 +37,7 @@
 		"firstname": {
 			"label" : "名",
 			"type": "text",
-			"required": true,
+			"required": "名を名乗れ",
 			"maxlength": 10,
 			"class" : "input-mini",
 			"size" : 5,
@@ -50,7 +50,10 @@
 			//"label" : "姓(カナ)",
 			//"type": "text",
 			"rules": {
-				"required": true,
+				"required": {
+					"value" : true,
+					"message" : "カナで姓をいれろ"
+				},
 				"maxlength": 10
 			},
 			"class" : "input-mini",
@@ -112,7 +115,9 @@
 			"label" : "部署名",
 			"type" : "text",
 			"maxlength" : 20,
-			"requiredIf" : "会社!=''"
+			"requiredIf" : [
+				{ "name" : "会社", "op" : "in", "value" : ["*"]}
+			]
 		},
 		//selectの場合はvaluesに配列でoptionを指定します。
 		//valuesの書き方は正表記と略表記の2種類あります。
@@ -170,7 +175,7 @@
  		"language": {
 			"label": "使用している言語を選択してください。(複数可))",
 			"type" : "checkbox",
-			"required": true,
+			"requiredIf": "select3==1||select3==2||select3==3",
 			"values": [
 				"1:Java",
 				"2:C++",
@@ -230,7 +235,7 @@
  		"checkbox2": {
 			"label" : " ", //ラベルを空にしたい場合はスペースを指定してください
 			"type": "checkbox",
-			"required": true,
+			"required": "いいからチェックしろ",
 			"checked": true,
 			"values" : [
 				"ture:内容に同意して次に進む"
@@ -241,14 +246,8 @@
 			"value" : "test"
 		}
 	},
+	"debug" : true,
 	"rules" : {
 		"requiredOne": "tel1,tel2,tel3"
-	},
-	"validateOptions": {
-		"messages": {
-			"checkbox2": {
-				"required": "いいからチェックしろ"
-			}
-		}
 	}
 }

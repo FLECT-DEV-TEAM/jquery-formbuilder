@@ -46,26 +46,42 @@ $(function() {
 	editor.setTheme("ace/theme/idle_fingers");
 	editor.getSession().setMode("ace/mode/json");
 	editor.getSession().setTabSize(2);
+	editor.getSession().on("change", buildForm());
 	
 	$form.formbuilder(initialData);
-	$("#test").click(function() {
-		var text = editor.getValue();
-		if (json != text) {
-			var obj = null;
-			text = text.replace(/\/\/.*\n/g, "\n")
-			try {
-				obj = JSON.parse(text);
-			} catch (e) {
-				alert("parse error: " + ("" + e).substring(0, 20) + "...");
-				throw e;
+	
+	function hasError() {
+		var annotations = editor.getSession().getAnnotations();
+		if (annotations) {
+			for (var i=0; i<annotations.length; i++) {
+				if (annotations[i].type == "error") {
+					return true;
+				}
 			}
-			if (obj) {
-				$.removeData($form[0], "validator");
-				$form.empty().formbuilder(obj);
-			}
-			json = text;
 		}
-	});
+		return false;
+	}
+	function buildForm() {
+		if (!hasError()) {
+			var text = editor.getValue();
+			if (json != text) {
+				var obj = null;
+				text = text.replace(/\/\/.*\n/g, "\n")
+				try {
+					obj = JSON.parse(text);
+				} catch (e) {
+					alert("parse error: " + ("" + e).substring(0, 20) + "...");
+					throw e;
+				}
+				if (obj) {
+					$.removeData($form[0], "validator");
+					$form.empty().formbuilder(obj);
+				}
+				json = text;
+			}
+		}
+	}
+	$("#test").click(buildForm);
 	$("#submit").click(function() {
 		if ($form.validate().form()) {
 			alert("エラーはありません");
