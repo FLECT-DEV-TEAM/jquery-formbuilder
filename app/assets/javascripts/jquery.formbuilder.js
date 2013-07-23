@@ -58,6 +58,11 @@
 			return this.optional(element) || /^[0-9-]{10,13}$/.test(value);
 		}, "電話番号を入力してください（例:012-345-6789）");
 		
+		//正規表現
+		$.validator.addMethod("regexp", function(value, element, param) {
+			return this.optional(element) || new RegExp(param).test(value);
+		}, "「{0}」形式で入力してください");
+		
 		//複数項目のいずれかが必須
 		$.validator.messages.requiredOne = "{0}のいずれかは必須です";
 		
@@ -418,6 +423,9 @@
 				case "requiredIf":
 					return "rules";
 			}
+			if (key.indexOf("data-") == 0) {
+				return "attrs";
+			}
 			for (var name in $.validator.methods) {
 				if (name == key) {
 					return "rules";
@@ -433,6 +441,7 @@
 				case "requiredIf":
 				case "min":
 				case "max":
+				case "regexp":
 					return true;
 				default:
 					return false;
@@ -476,7 +485,7 @@
 			$.each(rules, function(name, value) {
 				if (typeof(value) == "object") {
 					if (value.message) {
-						addValidateMessage(key, name, value.message);
+						addValidateMessage(key, name == "requiredIf" ? "required" : name, value.message);
 						delete value.message;
 					}
 					if (value.value && Object.keys(value).length == 1) {
@@ -608,7 +617,7 @@
 				$span.append($input);
 				if (op.text) {
 					var $label = $("<label/>");
-					$label.text(op.text);
+					$label.html(op.text);
 					$span.append($label);
 				}
 			}

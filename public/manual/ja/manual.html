@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>jquery.formbuilder Plugin</title>
+<link rel="stylesheet" type="text/css" media="screen" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/redmond/jquery-ui.css" />
+<link rel="stylesheet" media="screen" href="../../stylesheets/manual.css">
+<!--[if lt IE 9.0]>
+<link rel="stylesheet" media="screen" href="stylesheets/manual.oldie.css">
+<![endif]-->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="../../javascripts/jquery.splitter.js"></script>
+<script src="../../javascripts/manual.js"></script>
+<link rel="shortcut icon" type="image/png" href="../images/favicon.png">
+</head>
+<body>
+<header>
+	<h1>jquery.formbuilder Plugin</h1>
+	<a href="/main">メイン</a>
+	<div style="clear:both"></div>
+</header>
+<nav></nav>
+<section>
+	<h1>このプラグインについて</h1>
+	<p>
+	JSONで定義した項目情報を元にフォームを生成するjQueryプラグインです。
+	</p>
+	<p>
+	各種エラーチェック(ルール)やajaxでの通信にも対応しています。
+	</p>
+	<p>
+	このプラグインは以下の3つを目標として開発されています。
+	</p>
+	<ul>
+		<li>必要最小限の定義でフォームとルールを生成できること</li>
+		<li>直観的でかつ冗長でない読みやすい定義フォーマットであること</li>
+		<li>拡張可能であること</li>
+	</ul>
+	<div class="memo">
+		<p>エラーチェックには<a href="http://jqueryvalidation.org/">jQuery Validation Plugin</a>を使用しています。</p>
+		<p>Validationプラグインの枠組み内でエラーチェックを拡張することができます。</p>
+	</div>
+</section>
+<section>
+	<h1>Getting started!</h1>
+	<section>
+		<h1>インクルードするスクリプト</h1>
+		<p>
+		本プラグインを利用するためには以下のJavaScript/CSSをHTML内でインクルードしてください。
+		</p>
+		<code><pre>
+&lt;link  href="scripts/jquery.formbuilder.css" rel="stylesheet" media="screen" >
+&lt;script src="scripts/jquery.formbuilder.js">&lt;/script>
+&lt;script src="scripts/ext/validation/jquery.validate.js">&lt;/script>
+
+&lt;-- Validationプラグイン標準のエラーメッセージを日本語化する場合に追加 -->
+&lt;script src="scripts/ext/validation/localization/messages_ja.js">&lt;/script>
+</pre></code>
+		<p>
+		これ以外にjQueryのインクルードが必要です。またフォームの項目型に「date」を使用する場合はjQuery-UIが必要です。
+		</p>
+		<p>
+		Validationプラグインにバンドルされているadditional-methods.jsや自分で作成したエラーチェック関数を追加することでエラーチェックを拡張することも可能です。
+		</p>
+	</section>
+	<section>
+		<h1>フォーム定義のサンプル</h1>
+		<p>
+		サンプルとして名前、性別、メールアドレス、パスワード(とその確認)を含むフォーム定義とそこからフォームを生成するスクリプトを以下に示します。
+		</p>
+		<code><pre>
+//ToDo
+</pre></code>
+		<p>
+		空のform要素に対してプラグインを実行することでフォームが生成されます。
+		</p>
+		<p>
+		form要素内にsubmitボタンなどの個別の要素がある場合、生成されたフォームはそれらよりも前に差し込まれます。
+		</p>
+	</section>
+</section>
+<section>
+	<h1>フォーム定義の書式</h1>
+	<p>
+	フォーム定義はJSONで定義します。正規のJSON定義は曖昧さのない構造化されたフォーマットとなっていますが、利便性のためにいくつかの省略記法も用意されています。
+	</p>
+	<p>
+	実際にはほとんどの場合、定義に必要な情報は省略記法のみで表現できるので正規表記が必要となるケースは多くありません。
+	</p>
+	<section>
+		<h1>個別フォーム要素定義(items)</h1>
+		<p>
+		生成するフォームの各要素は「items」というキーで定義します。
+		</p>
+		<p>
+		itemsの内容はinput(またはselect、textarea)要素のname属性の値をキーとした個別の項目定義です。
+		</p>
+		<p>
+		items内での定義順に上からフォーム要素が生成されます。
+		</p>
+		<div class="memo">
+			<p>説明を簡略化するため以下ではselect、textareaを含むフォーム要素を「input」と表現します。</p>
+		</div>
+		<p>
+		各項目の定義で使用できるキーを以下に示します。
+		</p>
+		<table border="1">
+			<tr>
+				<th>キー</th>
+				<th>値の型</th>
+				<th>説明</th>
+			</tr>
+			<tr>
+				<td>type</td>
+				<td>string</td>
+				<td>
+					<p>inputの型。指定できる値は以下です。</p>
+					<ul>
+						<li>text</li>
+						<li>password</li>
+						<li>hidden</li>
+						<li>file</li>
+						<li>select</li>
+						<li>radio</li>
+						<li>checkbox</li>
+						<li>textarea</li>
+						<li>date(jQuery-UIが必要です。)</li>
+					</ul>
+					<p>select, radio, checkboxでは項目を定義するために併せてvaluesを指定する必要があります。</p>
+					<p>type省略時には「text」となります。</p>
+				</td>
+			</tr>
+			<tr>
+				<td>label</td>
+				<td>string</td>
+				<td>項目の表示名を指定します。省略時には項目のキーが表示名になります。</td>
+			</tr>
+			<tr>
+				<td>values</td>
+				<td>stringまたはobjectの配列</td>
+				<td>
+					<p>typeがselect, radio, checkboxの場合のオプションを指定します。</p>
+					<p>詳細は後述します。</p>
+				</td>
+			</tr>
+			<tr>
+				<td>selected</td>
+				<td>string</td>
+				<td>
+					<p>typeがselectの場合に初期状態で選択状態とする項目のvalueを指定します。</p>
+					<p>複数の項目を選択状態にする場合は「,」区切りで複数の値を指定することができます。</p>
+				</td>
+			</tr>
+			<tr>
+				<td>checked</td>
+				<td>string</td>
+				<td>
+					<p>typeがradio, checkboxの場合に初期状態でチェック状態とする項目のvalueを指定します。</p>
+					<p>複数の項目をチェック状態にする場合は「,」区切りで複数の値を指定することができます。</p>
+				</td>
+			</tr>
+			<tr>
+				<td>rules</td>
+				<td>object</td>
+				<td>
+					<p>エラーチェックの定義を指定します。</p>
+					<p>詳細は後述します。</p>
+				</td>
+			</tr>
+			<tr>
+				<td>attrs</td>
+				<td>object</td>
+				<td>生成したinputに付加する属性をキーと値のペアで指定します。</td>
+			</tr>
+			<tr>
+				<td>follow</td>
+				<td>boolean</td>
+				<td>
+					<p>項目を前の項目の後ろに続けて表示する場合にtrueを指定します。</p>
+					<p>例えば姓、名を個別に入力させる場合にそれらを1行で表示させることができます。</p>
+				</td>
+			</tr>
+		</table>
+		<p>
+			「attrs」と「rules」は省略して上位に直接記述することができます。
+		</p>
+		<p>
+			省略時にはキー名からattrsとrulesの適切な方を判断して正規化されます。
+		</p>
+		<p>
+			例えば以下の二つの定義内容は同じです。
+		</p>
+		<code><pre>
+"name" : {
+    "type" : "text",
+    "rules" : {
+        "required" : true
+    },
+    "attrs" : {
+        "class" : "input-name"
+    }
+},
+"name2" : {
+    "type" : "text",
+    "required" : true,
+    "class" : "input-name"
+}
+</pre></code>
+		<section>
+			<h1>select要素の項目定義(values)</h1>
+			<p>
+			select要素の各項目(option要素)は「values」というキーで定義します。
+			</p>
+			<p>
+			valuesにはstringまたはobjectの配列を指定します。(配列内にstringとobjectを混在させても構いません。)
+			</p>
+			<h4>stringで指定する場合</h4>
+			<p>
+			値をstringで指定する場合は各optionのvalueとテキストを「&lt;value>:&lt;text>」のように「:」で区切って指定します。
+			</p>
+			<p>
+			文字列内に「:」が無い場合はvalueとテキストは同じになります。
+			</p>
+			<code><pre>
+"post": {
+    "label" : "役職",
+    "type": "select",
+    "values": [
+        "1:社長",
+        "2:部長",
+        "3:課長",
+        "4:係長",
+        "5:平社員"
+    ],
+    "selected" : "2"
+},
+</pre></code>
+			<h4>objectで指定する場合</h4>
+			<p>
+			値をobjectで指定する場合は以下のキーでselectの内容をさらに詳細に設定できます。
+			</p>
+			<table border="1">
+				<tr>
+					<th>キー</th>
+					<th>値の型</th>
+					<th>説明</th>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>string</td>
+					<td>optionのvalue</td>
+				</tr>
+				<tr>
+					<td>text</td>
+					<td>string</td>
+					<td>optionのtext。省略時はvalueと同じ</td>
+				</tr>
+				<tr>
+					<td>group</td>
+					<td>string</td>
+					<td>
+						<p>指定された場合以降の項目がグループ(optGroup)になります。</p>
+					</td>
+				</tr>
+				<tr>
+					<td>selected</td>
+					<td>boolean</td>
+					<td>trueの場合選択状態になります。</td>
+				</tr>
+				<tr>
+					<td>disabled</td>
+					<td>boolean</td>
+					<td>trueの場合使用不可状態になります。</td>
+				</tr>
+			</table>
+			<code><pre>
+"business": {
+	"label" : "業種(複数選択可)",
+	"type": "select",
+	"values": [
+		{ "value": "1", "text": "システムインテグレーション", "group" : "開発系"},
+		{ "value": "2", "text": "パッケージ開発", "selected" : true},
+		{ "value": "3", "text": "サービス開発"},
+		{ "value": "4", "text": "システム運用管理", "group" : "運用系"},
+		{ "value": "5", "text": "コンサルティング"},
+		{ "value": "6", "text": "その他", "group" : "その他"}
+	],
+	"size": 6,
+	"multiple": true,
+	"selected" : "1,3,5"
+},
+</pre></code>
+			<div class="memo">
+				<p>初期選択状態はアイテム定義でのselected、values内でのselectedのどちらでも指定できます。</p>
+				<p>いずれもoption/@selected属性を付加しているだけなので両方を指定した場合の動作はブラウザに依存します。</p>
+			</div>
+		</section>
+		<section>
+			<h1>radio, checkboxの項目定義(values)</h1>
+			<p>
+			typeがradioまたはcheckboxの場合は複数の項目を「values」というキーで定義できます。
+			</p>
+			<p>
+			valuesにはselectの場合と同様にstringまたはobjectの配列を指定します。(配列内にstringとobjectを混在させても構いません。)
+			</p>
+			<h4>stringで指定する場合</h4>
+			<p>
+			値をstringで指定する場合は各inputのvalueとテキストを「&lt;value>:&lt;text>」のように「:」で区切って指定します。
+			</p>
+			<p>
+			文字列内に「:」が無い場合はvalueとテキストは同じになります。
+			</p>
+			<code><pre>
+"language": {
+    "label": "使用している言語を選択してください。(複数可))",
+    "type" : "checkbox",
+    "values": [
+        "1:Java",
+        "2:C++",
+        "3:Ruby",
+        "4:PHP",
+        "5:Scala",
+        "6:JavaScript"
+    ]
+},
+</pre></code>
+			<h4>objectで指定する場合</h4>
+			<p>
+			値をobjectで指定する場合は以下のキーが指定できます。項目を途中で改行させたい場合にはbreakを指定します。
+			</p>
+			<table border="1">
+				<tr>
+					<th>キー</th>
+					<th>値の型</th>
+					<th>説明</th>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>string</td>
+					<td>inputのvalue</td>
+				</tr>
+				<tr>
+					<td>text</td>
+					<td>string</td>
+					<td>inputの右に表示するtext。省略時はvalueと同じ</td>
+				</tr>
+				<tr>
+					<td>checked</td>
+					<td>boolean</td>
+					<td>trueの場合チェック状態になります。</td>
+				</tr>
+				<tr>
+					<td>disabled</td>
+					<td>boolean</td>
+					<td>trueの場合使用不可状態になります。</td>
+				</tr>
+				<tr>
+					<td>break</td>
+					<td>boolean</td>
+					<td>trueの場合改行してこの項目を事業に表示します。</td>
+				</tr>
+			</table>
+			<code><pre>
+"experience": {
+    "label" : "経験年数",
+    "type": "radio",
+    "required": true,
+    "values": [
+        { "value": "1", "text": "10年以上"},
+        { "value": "2", "text": "8-10年"},
+        { "value": "3", "text": "5-8年", "checked" : true, "break" : true},
+        { "value": "4", "text": "3-5年"},
+        { "value": "5", "text": "2,3年", "break" : true},
+        { "value": "6", "text": "1年以下", "disabled" : true}
+    ]
+},
+</pre></code>
+		</section>
+	</section>
+	<section>
+		<h1>個別のルール定義(rules)</h1>
+		<section>
+			<h1>必須(required)</h1>
+		</section>
+		<section>
+			<h1>数値(number, digits)</h1>
+		</section>
+		<section>
+			<h1>最大値、最小値(min, max)</h1>
+		</section>
+		<section>
+			<h1>文字列の長さ(minlength, maxlength)</h1>
+		</section>
+		<section>
+			<h1>メールアドレス(email)</h1>
+		</section>
+		<section>
+			<h1>URL(url)</h1>
+		</section>
+		<section>
+			<h1>日付(date)</h1>
+		</section>
+		<section>
+			<h1>クレジットカード(creditcard)</h1>
+		</section>
+		<section>
+			<h1>パスワード等の再入力(equalTo)</h1>
+		</section>
+		<section>
+			<h1>ひらがな、カタカナのみ(hiragana, katakana, hankana)</h1>
+		</section>
+		<section>
+			<h1>英字、英数のみ(alpha, alphanum)</h1>
+		</section>
+		<section>
+			<h1>郵便番号(postcode)</h1>
+		</section>
+		<section>
+			<h1>電話番号(tel)</h1>
+		</section>
+		<section>
+			<h1>正規表現(regexp)</h1>
+		</section>
+		<section>
+			<h1>条件付き必須(requiredIf)</h1>
+		</section>
+	</section>
+	<section>
+		<h1>項目間のルール定義(rules)</h1>
+		<section>
+			<h1>複数項目のどれか一つが必須(requiredOne)</h1>
+		</section>
+	</section>
+	<section>
+		<h1>その他のオプション定義</h1>
+		debug
+		labelWidth
+		validateOptions
+	</section>
+</section>
+<footer>
+	<div class="copy-right">
+		COPYRIGHT（C）FLECT CO.,LTD. ALL RIGHTS RESERVED
+	</div>
+	<div style="clear:both"></div>
+</footer>
+</body>
+</html>

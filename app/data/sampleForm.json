@@ -115,9 +115,12 @@
 			"label" : "部署名",
 			"type" : "text",
 			"maxlength" : 20,
-			"requiredIf" : [
-				{ "name" : "会社", "op" : "in", "value" : ["*"]}
-			]
+			"requiredIf" : {
+				"value" :[
+					{ "name" : "会社", "op" : "in", "value" : ["*"]}
+				],
+				"message" : "会社名を入力した場合は必須です。"
+			}
 		},
 		//selectの場合はvaluesに配列でoptionを指定します。
 		//valuesの書き方は正表記と略表記の2種類あります。
@@ -240,6 +243,15 @@
 			"values" : [
 				"ture:内容に同意して次に進む"
 			]
+		},
+		"regexp": {
+			"label": "正規表現",
+			"type": "text",
+			"regexp": {
+				"value" : "\\d+",
+				"message" : "数値をいれろ"
+			},
+			"required": true
 		},
 		"id" : {
 			"type" : "hidden",
