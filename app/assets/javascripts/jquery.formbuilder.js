@@ -74,18 +74,9 @@
 		}
 		function term(obj) {
 			debug("term1: ", obj);
-			var name, op, value;
-			if (Object.keys(obj).length == 1) {
-				for (var key in obj) {
-					name = key;
-					op = "==";
-					value = obj[key];
-				}
-			} else if (obj.name && obj.value) {
-				name = obj.name;
-				op = obj.op || "==";
+			var name = obj.name, 
+				op = obj.op || "==", 
 				value = obj.value;
-			}
 			debug("term2: " + name + ", " + op + ", " + value);
 			if (!context.getId(name)) {
 				evaluateError(obj);
@@ -105,7 +96,11 @@
 					return target <= value;
 				case "!=":
 				case "<>":
-					return target != value;
+					if (value) {
+						return target != value;
+					} else {
+						return !!target;
+					}
 				case "in":
 					for (var i=0; i<value.length; i++) {
 						if (value[i] == "*" && target) {
@@ -131,7 +126,7 @@
 					} else if (obj.op == "||") {
 						ret =composite(false, obj.cond);
 					}
-				} else if (obj.op && obj.name && obj.value) {
+				} else if (obj.op && obj.name) {
 					ret = term(obj);
 				}
 				debug("composite2: " + ret);
@@ -166,7 +161,7 @@
 					return idx;
 				}
 			}
-			throw idx;
+			return idx;
 		}
 		function parseName(str, idx) {
 			var len = str.length;
@@ -217,16 +212,20 @@
 				value = null;
 			
 			try {
+console.log("test1:" + spos + ", " + idx);
 				spos = skipWhitespace(str, spos);
 				idx = parseName(str, spos);
 				name = str.substring(spos, idx);
+console.log("test2:" + spos + ", " + idx);
 				
 				spos = skipWhitespace(str, idx);
 				idx = parseComparisionOp(str, spos);
 				op = str.substring(spos, idx);
+console.log("test3:" + spos + ", " + idx);
 				
 				spos = skipWhitespace(str, idx);
 				idx = parseValue(str, spos);
+console.log("test4:" + spos + ", " + idx);
 				value = str.substring(spos, idx).trim();
 				
 				if (op == "==" && value == "*") {

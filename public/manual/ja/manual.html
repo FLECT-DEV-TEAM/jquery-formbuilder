@@ -379,50 +379,164 @@
 	</section>
 	<section>
 		<h1>個別のルール定義(rules)</h1>
+		<p>
+			ルール(エラーチェック)は各アイテム定義に複数定義することができます。
+		</p>
+		<p>
+			構造的には「rules」というプレースホルダの下に定義するのが正確ですが、「rules」を省略して上位に直接記述することもできます。
+		</p>
+		<p>
+			正規のルール定義の形式は以下のようにvalueとmessageの2つのキーを持ちます。
+		</p>
+			<code><pre>
+"rules": {
+    "required" : {
+        "value" : true,
+        "message" : "この項目は必須です。"
+    },
+    "maxlength" : {
+        "value" : 256,
+        "message" : "256文字以下で入力してください。"
+    }
+}
+</pre></code>
+		<ul>
+			<li>「value」にはValidationプラグインに渡されるパラメータを指定します。</li>
+			<li>「message」にはエラーメッセージを指定します。</li>
+		</ul>
+		<p>
+			この形式を基本として以下の省略形も許容されています。
+		</p>
+		<ul>
+			<li>「message」がない(＝デフォルトのメッセージを使用する)場合はプレースホルダを省略してvalueを上位に直接指定することができる。</li>
+			<li>「value」に指定する型がboolean型の場合はプレースホルダを省略してmessageを上位に直接指定することができる。</li>
+		</ul>
+		<p>
+			つまり以下のような省略形はいずれも正しいルール定義です。
+		</p>
+			<code><pre>
+"rules": {
+    "required" : "この項目は必須です。",
+    "maxlength" : 256
+}
+</pre></code>
+		<p>
+			ルールには以下のものがあります。
+		</p>
 		<section>
 			<h1>必須(required)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>その項目を必須とします。</p>
 		</section>
 		<section>
 			<h1>数値(number, digits)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>その項目を数値項目とします。</p>
+			<p>「number」では小数と負数も許容されますが、「digits」では0から9までの数値以外はエラーとなります。</p>
 		</section>
 		<section>
-			<h1>最大値、最小値(min, max)</h1>
+			<h1>最大値、最小値(max, min)</h1>
+			<p class="datatype">データ型： number</p>
+			<p>数値項目の最大値、最小値を指定します。</p>
 		</section>
 		<section>
 			<h1>文字列の長さ(minlength, maxlength)</h1>
+			<p class="datatype">データ型： number</p>
+			<p>文字列項目の文字数の最大値、最小値を指定します。</p>
 		</section>
 		<section>
 			<h1>メールアドレス(email)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>メールアドレス形式のチェックを行います。</p>
 		</section>
 		<section>
 			<h1>URL(url)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>URL形式のチェックを行います。</p>
 		</section>
 		<section>
 			<h1>日付(date)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>日付形式のチェックを行います。</p>
+			<div class="memo">
+				<p>アイテム定義でtype=dateとした場合は自動的に適用されます。</p>
+			</div>
 		</section>
 		<section>
 			<h1>クレジットカード(creditcard)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>クレジットカード形式のチェックを行います。</p>
 		</section>
 		<section>
 			<h1>パスワード等の再入力(equalTo)</h1>
+			<p class="datatype">データ型： string</p>
+			<p>他のアイテムと入力値が同じかどうかのチェックを行います。</p>
+			<p>valueには比較するアイテムのキーを指定します。</p>
 		</section>
 		<section>
 			<h1>ひらがな、カタカナのみ(hiragana, katakana, hankana)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>ひらがなのみ(hiragana)、カタカナのみ(katakana)、半角カナのみ(hankana)かどうかのチェックを行います。</p>
 		</section>
 		<section>
 			<h1>英字、英数のみ(alpha, alphanum)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>英字のみ(alpha)、英数字のみ(alphanum)かどうかのチェックを行います。</p>
 		</section>
 		<section>
 			<h1>郵便番号(postcode)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>郵便番号形式(^¥d{3}¥-¥d{4}$)のチェックを行います。</p>
 		</section>
 		<section>
 			<h1>電話番号(tel)</h1>
+			<p class="datatype">データ型： boolean</p>
+			<p>電話番号形式(^[0-9-]{10,13}$)のチェックを行います。</p>
 		</section>
 		<section>
 			<h1>正規表現(regexp)</h1>
+			<p class="datatype">データ型： string</p>
+			<p>valueに指定した正規表現でのチェックを行います。</p>
 		</section>
 		<section>
 			<h1>条件付き必須(requiredIf)</h1>
+			<p class="datatype">データ型： object または string</p>
+			<p>条件を満たす場合にのみ必須チェックを行います。</p>
+			<p>正規の条件定義の方法は以下の形式です。</p>
+			<code><pre>
+"requiredIf" : {
+	"op" : "&&",
+	"cond" : [
+		{
+			"name" : "item1",
+			"op" : "==",
+			"value" : "1"
+		},
+		{
+			"op" : "||",
+			"cond" : [
+				{
+					"name" : "item2",
+					"op" : "==",
+					"value" : "1"
+				},
+				{
+					"name" : "item2",
+					"op" : "==",
+					"value" : "2"
+				}
+			]
+		}
+	]
+}
+</pre></code>
+		<ul>
+			<li>構造体としては「op」と「cond」の2つの構造体を持つものと「name」「op」「value」の3つのキーを持つものの2種類がある</li>
+			<li>前者は条件式でのグループ(括弧で括られた部分)に相当し、後者は比較式に相当する</li>
+			<li>グループの場合「op」には「&&」か「||」のいずれかが指定できる</li>
+			<li>グループの場合「cond」には比較式またはグループを配列で指定する</li>
+			<li>比較式の「name」にはアイテムのキーを比較式またはグループを配列で指定する</li>
+		</ul>
 		</section>
 	</section>
 	<section>

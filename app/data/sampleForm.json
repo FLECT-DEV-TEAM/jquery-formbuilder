@@ -115,10 +115,12 @@
 			"label" : "部署名",
 			"type" : "text",
 			"maxlength" : 20,
+//			"requiredIf" : {
+//				"value" :[
+//					{ "name" : "会社", "op" : "in", "value" : ["*"]}
+//				],
 			"requiredIf" : {
-				"value" :[
-					{ "name" : "会社", "op" : "in", "value" : ["*"]}
-				],
+				"value" : "会社!=",
 				"message" : "会社名を入力した場合は必須です。"
 			}
 		},
