@@ -639,6 +639,36 @@
 		</table>
 	</section>
 </section>
+<section>
+	<h1>WYSIWYGエディタ</h1>
+	<p>
+		WYSIWYGエディタはブラウザ上でformbuilder用のJSONを編集できるツールです。
+	</p>
+	<p>
+		画面上で以下のことが行えます。
+	</p>
+	<ul>
+		<li>作成したJSONから生成されるフォームの確認</li>
+		<li>フォームのエラーチェックの動作確認</li>
+		<li><a href="http://twitter.github.io/bootstrap/">Twitter Bootstrap</a>のスタイルを適用するか否かの切り替え</li>
+		<li>適用するCSSの編集</li>
+	</ul>
+</section>
+<section>
+	<h1>Ajaxでのサブミット</h1>
+	<p>
+		Ajaxに限らずサブミット周りのヘルパー仕様検討中。
+	</p>
+	<p>
+		要件として考えられるのは以下。
+	</p>
+	<ul>
+		<li>JSON形式でサブミットできる</li>
+		<li>サーバー側(Java)でJSONを読み込んでクライアント側と同じエラーチェックが実行できる</li>
+		<li>2度押し防止</li>
+		<li>CSRF対応</li>
+	</ul>
+</section>
 <footer>
 	<div class="copy-right">
 		COPYRIGHT（C）FLECT CO.,LTD. ALL RIGHTS RESERVED
