@@ -26,46 +26,45 @@
 		//全角ひらがなのみ
 		$.validator.addMethod("hiragana", function(value, element) {
 			return this.optional(element) || /^([ぁ-ん]+)$/.test(value);
-		}, "全角ひらがなを入力してください");
+		}, "Please enter only Hiragana.");
 
 		//全角カタカナのみ
 		$.validator.addMethod("katakana", function(value, element) {
 			return this.optional(element) || /^([ァ-ヶー]+)$/.test(value);
-		}, "全角カタカナを入力してください");
+		}, "Please enter only Katakana.");
 
 		//半角カタカナのみ
 		$.validator.addMethod("hankana", function(value, element) {
 			return this.optional(element) || /^([ｧ-ﾝﾞﾟ]+)$/.test(value);
-		}, "半角カタカナを入力してください");
+		}, "Please enter only hankaku kana.");
 
 		//半角アルファベット（大文字･小文字）のみ
 		$.validator.addMethod("alpha", function(value, element) {
 			return this.optional(element) || /^([a-zA-z¥s]+)$/.test(value);
-		}, "半角英字を入力してください");
+		}, "Please enter only alphabet.");
 
 		//半角アルファベット（大文字･小文字）もしくは数字のみ
 		$.validator.addMethod("alphanum", function(value, element) {
 			return this.optional(element) || /^([a-zA-Z0-9]+)$/.test(value);
-		}, "半角英数字を入力してください");
+		}, "Please enter only alphabet or number.");
 		
 		//郵便番号（例:012-3456）
 		$.validator.addMethod("postcode", function(value, element) {
 			return this.optional(element) || /^¥d{3}¥-¥d{4}$/.test(value);
-		}, "郵便番号を入力してください（例:123-4567）");
+		}, "Please enter a valid postcode");
 
 		//電話番号（例:010-2345-6789）
 		$.validator.addMethod("tel", function(value, element) {
 			return this.optional(element) || /^[0-9-]{10,13}$/.test(value);
-		}, "電話番号を入力してください（例:012-345-6789）");
+		}, "Please enter a valid telephone number.");
 		
 		//正規表現
 		$.validator.addMethod("regexp", function(value, element, param) {
 			return this.optional(element) || new RegExp(param).test(value);
-		}, "「{0}」形式で入力してください");
+		}, "「Please enter \"{0}\" format.");
 		
 		//複数項目のいずれかが必須
-		$.validator.messages.requiredOne = "{0}のいずれかは必須です";
-		
+		$.validator.messages.requiredOne = "At least onf of {0} is required.";
 	})();
 
 	function Evaluator(context) {
@@ -101,16 +100,6 @@
 					} else {
 						return !!target;
 					}
-				case "in":
-					for (var i=0; i<value.length; i++) {
-						if (value[i] == "*" && target) {
-							return true;
-						}
-						if (target == value[i]) {
-							return true;
-						}
-					}
-					return false;
 				default:
 					evaluateError(obj);
 			}
@@ -212,24 +201,21 @@
 				value = null;
 			
 			try {
-console.log("test1:" + spos + ", " + idx);
 				spos = skipWhitespace(str, spos);
 				idx = parseName(str, spos);
 				name = str.substring(spos, idx);
-console.log("test2:" + spos + ", " + idx);
 				
 				spos = skipWhitespace(str, idx);
 				idx = parseComparisionOp(str, spos);
 				op = str.substring(spos, idx);
-console.log("test3:" + spos + ", " + idx);
 				
 				spos = skipWhitespace(str, idx);
 				idx = parseValue(str, spos);
-console.log("test4:" + spos + ", " + idx);
 				value = str.substring(spos, idx).trim();
 				
 				if (op == "==" && value == "*") {
-					op = "in";
+					op = "!=";
+					value = "";
 				}
 				return {
 					name: name,
@@ -741,6 +727,9 @@ console.log("test4:" + spos + ", " + idx);
 				}
 				if (type != "hidden") {
 					$li.append($label);
+				}
+				if (options.labelBreak) {
+					$li.append("<br>");
 				}
 				$li.append($target ? $target : $input);
 				if (values.rules && !$.isEmptyObject(values.rules)) {

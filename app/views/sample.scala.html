@@ -4,13 +4,16 @@
 @base("Form Generator") {
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/jquery.formbuilder.css")">
 <script src="@routes.Assets.at("javascripts/ext/validation/jquery.validate.js")" type="text/javascript"></script>
-<script src="@routes.Assets.at("javascripts/ext/validation/localization/messages_ja.js")" type="text/javascript"></script>
 <script src="@routes.Assets.at("javascripts/jquery.formbuilder.js")" type="text/javascript"></script>
+<script src="@routes.Assets.at("javascripts/ext/validation/localization/messages_ja.js")" type="text/javascript"></script>
 @if(bootstrap) {
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("javascripts/ext/bootstrap/css/bootstrap.css")">
 <script src="@routes.Assets.at("javascripts/ext/bootstrap/js/bootstrap.js")" type="text/javascript"></script>
 }
 <script src="@routes.Assets.at("javascripts/ext/ace/src/ace.js")" type="text/javascript" charset="utf-8"></script>
+
+<script src="@routes.Assets.at("javascripts/jquery.splitter.js")" type="text/javascript"></script>
+<script src="@routes.Assets.at("javascripts/formeditor.js")" type="text/javascript"></script>
 <style>
 #bootstrap-control {
 	margin-bottom: 10px;
@@ -19,81 +22,34 @@
 #editor-pane {
 	float: left;
 	margin-right: 30px;
-	margin-left: 10px;
 	background-color: #b0c4de;
 	height: 100%;
-	padding: 0 0 10px 5px;
+	box-sizing: border-box;	-moz-box-sizing: border-box;
 }
 #form-pane {
 	display: inline-block;
 	background-color: #ffefd5;
 	padding: 0 10px 10px 5px;
+	box-sizing: border-box;	-moz-box-sizing: border-box;
 }
 #editor { 
-	width: 600px;
+	width: 400px;
 	height: 400px;
 	margin-bottom: 10px;
+	box-sizing: border-box;	-moz-box-sizing: border-box;
 }
 
 </style>
 <script>
 $(function() {
-	var initialData = @Html(Include("app/data/sampleForm.json").replaceAll("//.*\n", "\n")),
-		$form = $("#sampleForm"),
-	    editor = ace.edit("editor"),
-		json = editor.getValue();
-	
-	editor.setTheme("ace/theme/idle_fingers");
-	editor.getSession().setMode("ace/mode/json");
-	editor.getSession().setTabSize(2);
-	editor.getSession().on("change", buildForm());
-	
-	$form.formbuilder(initialData);
-	
-	function hasError() {
-		var annotations = editor.getSession().getAnnotations();
-		if (annotations) {
-			for (var i=0; i<annotations.length; i++) {
-				if (annotations[i].type == "error") {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	function buildForm() {
-		if (!hasError()) {
-			var text = editor.getValue();
-			if (json != text) {
-				var obj = null;
-				text = text.replace(/\/\/.*\n/g, "\n")
-				try {
-					obj = JSON.parse(text);
-				} catch (e) {
-					alert("parse error: " + ("" + e).substring(0, 20) + "...");
-					throw e;
-				}
-				if (obj) {
-					$.removeData($form[0], "validator");
-					$form.empty().formbuilder(obj);
-				}
-				json = text;
-			}
-		}
-	}
-	$("#test").click(buildForm);
-	$("#submit").click(function() {
-		if ($form.validate().form()) {
-			alert("エラーはありません");
-		}
-	});
+	var initialData = @Html(Include("app/data/sampleForm.json").replaceAll("//.*\n", "\n"));
+	var editor = new flect.app.FormEditor(initialData);
 });
 </script>
-<div>
-<h1>Form Generator</h1>
-	<div id="bootstrap-control">
-		<a class="btn btn-warning" href="/sample?bootstrap=@(!bootstrap)">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
-	</div>
+<div id="header">
+	<h1>Form Generator</h1>
+</div>
+<div id="workspace">
 	<div id="editor-pane">
 		<h3>JSON定義</h3>
 		<p>
@@ -106,6 +62,9 @@ $(function() {
 		<div>
 			<button id="test" class="btn btn-primary">生成</button>
 		</div>
+		<div id="bootstrap-control">
+			<a class="btn btn-warning" href="/sample?bootstrap=@(!bootstrap)">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
+		</div>
 	</div>
 	<div id="form-pane">
 		<h3>フォーム</h3>
@@ -113,4 +72,5 @@ $(function() {
 		</form>
 		<button id="submit" class="btn btn-primary">チェック</button>
 	</div>    
-</div>}
+</div>
+}
