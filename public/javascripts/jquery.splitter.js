@@ -66,7 +66,7 @@
 				current.position(t);
 			}
 			if (current.windowResized()) {
-				curent.windowResized()(ev);
+				current.windowResized()(ev);
 			}
 		}
 		
@@ -202,7 +202,7 @@
 			div2.css({
 				"position" : "absolute",
 				"overflow-x" : "auto",
-				"right" : 0,
+				"left" : w1 + 4,
 				"width" : w2 - w3
 			});
 		} else {
@@ -224,7 +224,7 @@
 			div2.css({
 				"position" : "absolute",
 				"overflow-y" : "auto",
-				"bottom" : 0,
+				"top" : h1 + 4,
 				"height" : h2 - h3
 			});
 		}
@@ -272,14 +272,20 @@
 					} else {
 						var low = limit;
 						var high = parent.width() - limit;
+						var cur = parseInt(resizebar.css("left"));
 						if (n < low) {
 							n = low;
 						} else if (n > high) {
 							n = high;
 						}
-						resizebar.css("left", n);
-						div1.css("width", n);
-						div2.css("width", parent.width() - resizebar.outerWidth(true) - n);
+						if (n != cur) {
+							resizebar.css("left", n);
+							div1.css("width", n);
+						}
+						div2.css({
+							"left" : n + 4,
+							"width" : parent.width() - resizebar.outerWidth(true) - n
+						});
 					}
 				} else {
 					if (n === undefined) {
@@ -287,14 +293,20 @@
 					} else {
 						var low = limit;
 						var high = parent.height() - limit;
+						var cur = parseInt(resizebar.css("top"));
 						if (n < low) {
 							n = low;
 						} else if (n > high) {
 							n = high;
 						}
-						resizebar.css("top", n);
-						div1.css("height", n);
-						div2.css("height", parent.height() - resizebar.outerHeight(true) - n);
+						if (n != cur) {
+							resizebar.css("top", n);
+							div1.css("height", n);
+						}
+						div2.css({
+							"top" : n + 4,
+							"height" : parent.height() - resizebar.outerHeight(true) - n
+						});
 					}
 				}
 			},
@@ -374,7 +386,7 @@
 						div2.css({
 							"position" : "absolute",
 							"top" : 0,
-							"right" : 0,
+							"left" : w1,
 							"height" : "100%",
 							"width" : w2
 						});
@@ -416,7 +428,7 @@
 						});
 						div2.css({
 							"position" : "absolute",
-							"bottom" : 0,
+							"top" : h1,
 							"left" : 0,
 							"width" : "100%",
 							"height" : h2
