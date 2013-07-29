@@ -831,5 +831,41 @@
 			debug("validateOptions: ", validateOptions);
 			validator = $form.validate(validateOptions);
 		}
+		return new FormBuilder($form);
+	}
+	function FormBuilder($form) {
+		$.extend(this, {
+			"validate" : function() {
+				return $form.validate().form();
+			},
+			"getJson" : function() {
+				var ret = {};
+				$form.find(":input").each(function() {
+					var $el = $(this),
+						name = $el.attr("name"),
+						value = $el.val(),
+						type = $el.attr("type");
+					if (type == "checkbox" || type == "radio") {
+						if (!$el.is(":checked")) {
+							return;
+						}
+					}
+					if (ret[name]) {
+						var old = ret[name];
+						if ($.isArray(old)) {
+							old.push(value);
+						} else {
+							var array = [];
+							array.push(old);
+							array.push(value);
+							ret[name] = array;
+						}
+					} else {
+						ret[name] = value;
+					}
+				});
+				return ret;
+			}
+		});
 	}
 })(jQuery);

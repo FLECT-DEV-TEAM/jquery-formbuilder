@@ -49,8 +49,8 @@ $(function() {
 		
 		resize();
 		
-		var json = jsonEditor.getValue();
-		$form.formbuilder(JSON.parse(json));
+		var json = jsonEditor.getValue(),
+			builder = $form.formbuilder(JSON.parse(json));
 		buildCss();
 		
 		function resize() {
@@ -114,7 +114,8 @@ $(function() {
 			location.href = "/editor?bootstrap=" + !b + "&template=" + template;
 		});
 		$("#submit").click(function() {
-			if ($form.validate().form()) {
+console.log(JSON.stringify(builder.getJson()));
+			if (builder.validate()) {
 				alert("エラーはありません");
 			}
 		});

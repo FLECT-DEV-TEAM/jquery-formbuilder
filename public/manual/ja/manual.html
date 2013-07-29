@@ -133,14 +133,13 @@ var json = {
         }
     }
 }
-$("#form").formbuilder(json);
+var form = $("#form").formbuilder(json);
 </pre></code>
-		<p>
-		空のform要素に対してプラグインを実行することでフォームが生成されます。
-		</p>
-		<p>
-		form要素内にsubmitボタンなどの個別の要素がある場合、生成されたフォームはそれらよりも前に差し込まれます。
-		</p>
+		<ul>
+			<li>空のform要素に対してプラグインを実行することでフォームが生成されます。</li>
+			<li>form要素内にsubmitボタンなどの個別の要素がある場合、生成されたフォームはそれらよりも前に差し込まれます。</li>
+			<li>生成されたフォーム要素のメソッドでエラーチェックの実行やフォームの値のJSONでの取得が行えます。</li>
+		</ul>
 	</section>
 </section>
 <section>
@@ -719,10 +718,43 @@ $("#form").formbuilder(json);
 	</ul>
 </section>
 <section>
-	<h1>Ajaxでのサブミット</h1>
+	<h1>フォームのメソッド</h1>
 	<p>
-		Ajaxに限らずサブミット周りのヘルパー仕様検討中。
+		$("#form").formbuilderメソッドの帰り値はFormBuilderオブジェクトです。(jQueryオブジェクトではありません。)
 	</p>
+	<p>
+		FormBuilderオブジェクトには以下のメソッドがあります。
+	</p>
+	<table border="1">
+		<tr>
+			<th>メソッド名</th>
+			<th>引数</th>
+			<th>返り値</th>
+			<th>説明</th>
+		</tr>
+		<tr>
+			<td>validate</td>
+			<td>なし</td>
+			<td>boolean</td>
+			<td>
+				<p>エラーチェックを実行します。</p>
+				<p>エラーがない場合にはtrueが返ります。</p>
+			</td>
+		</tr>
+		<tr>
+			<td>getJson</td>
+			<td>なし</td>
+			<td>Object</td>
+			<td>
+				<p>フォームの内容をJSON形式で取得します。</p>
+			</td>
+		</tr>
+	</table>
+	<div class="memo">
+		<p>エラーチェックは「$("#form").validate().form()」のようにValidatorオブジェクトを取得した後にそちらのメソッドで実行することも可能です。</p>
+		<p>Validatorオブジェクトのメソッドについては<a href="http://jqueryvalidation.org/documentation/">Validatorプラグインのドキュメント</a>を参照してください。</p>
+	</div>
+	<!--
 	<p>
 		要件として考えられるのは以下。
 	</p>
@@ -732,6 +764,7 @@ $("#form").formbuilder(json);
 		<li>2度押し防止</li>
 		<li>CSRF対応</li>
 	</ul>
+	-->
 </section>
 <footer>
 	<div class="copy-right">
