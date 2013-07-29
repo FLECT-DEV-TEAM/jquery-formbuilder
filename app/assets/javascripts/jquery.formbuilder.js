@@ -264,7 +264,8 @@
 	*/
 	$.fn.formbuilder = function(options, resources) {
 		var $form = $(this),
-			$ul = $("<ul class='formbuilder-form'></ul>"),
+			$fieldset = $("<fieldset/>"),
+			$ul = $("<ul class='formbuilder-form'/>"),
 			rules = {},
 			idPrefix = options.idPrefix || "",
 			validateOptions = $.extend(true, {
@@ -278,7 +279,11 @@
 		if (!validateOptions.errorPlacement) {
 			validateOptions.errorPlacement = errorPlacement;
 		}
-		$form.prepend($ul);
+		if (options.title) {
+			$("<legend/>").text(options.title).appendTo($fieldset);
+		}
+		$fieldset.append($ul);
+		$form.prepend($fieldset);
 		
 		//Context for user defined function
 		var context = {

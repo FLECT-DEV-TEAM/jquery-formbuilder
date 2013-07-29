@@ -66,10 +66,74 @@
 	<section>
 		<h1>フォーム定義のサンプル</h1>
 		<p>
-		サンプルとして名前、性別、メールアドレス、パスワード(とその確認)を含むフォーム定義とそこからフォームを生成するスクリプトを以下に示します。
+		サンプルとして名前、メールアドレス、パスワード(とその確認)、誕生日を含むフォーム定義とそこからフォームを生成するスクリプトを以下に示します。
 		</p>
 		<code><pre>
-//ToDo
+var json = {
+    "title" : "ユーザー登録",
+    "items": {
+        "lastname": {
+            "label" : "姓",
+            "type": "text",
+            "rules" : {
+                "required": true,
+                "maxlength": 10
+            },
+            "attrs": {
+                "class" : "input-mini",
+                "size" : 5,
+                "placeholder" : "姓"
+            }
+        },
+        "firstname": {
+            "label" : "名",
+            "type": "text",
+            "rules" : {
+                "required": true,
+                "maxlength": 10
+            },
+            "attrs" : {
+                "class" : "input-mini",
+                "size" : 5,
+                "placeholder" : "名"
+            },
+            "follow" : true
+        },
+        "mail": {
+            "label" : "E-Mail",
+            "type": "text",
+            "rules" : {
+                "required": true,
+                "maxlength": 256,
+                "email" : true
+            },
+            "class" : "input-xlarge",
+            "size" : 40
+        },
+        "password": {
+            "label": "パスワード",
+            "type": "password",
+            "required": true,
+            "digits": true,
+            "minlength": 6,
+            "maxlength": 16
+        },
+        "password_confirm": {
+            "label": "パスワード(確認)",
+            "type": "password",
+            "rules" : {
+                "equalTo": "password"
+            }
+        },
+        "birthday": {
+            "label": "誕生日",
+            "type": "date",
+            "min" : "2000-01-01",
+            "max" : "2013-07-20"
+        }
+    }
+}
+$("#form").formbuilder(json);
 </pre></code>
 		<p>
 		空のform要素に対してプラグインを実行することでフォームが生成されます。

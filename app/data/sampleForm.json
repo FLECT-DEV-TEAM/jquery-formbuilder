@@ -206,6 +206,7 @@
 			"value" : "test"
 		}
 	},
+	"title" : "たいとる",
 	"debug" : true,
 	"rules" : {
 		"requiredOne": "tel1,tel2,tel3"

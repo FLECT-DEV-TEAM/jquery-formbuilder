@@ -1,4 +1,4 @@
-@(bootstrap: Boolean)
+@(bootstrap: Boolean, template: String)
 @import jp.co.flect.play2.tags.Include
 
 @base("Form Generator") {
@@ -15,62 +15,115 @@
 <script src="@routes.Assets.at("javascripts/jquery.splitter.js")" type="text/javascript"></script>
 <script src="@routes.Assets.at("javascripts/formeditor.js")" type="text/javascript"></script>
 <style>
-#bootstrap-control {
-	margin-bottom: 10px;
+body {
+	overflow: hidden;
+}
+#header {
+	height: 100px;
+	background-color: #b0c4de;
+	border-bottom: solid 1px #D3D3D3;
+}
+#header h1 {
+  margin:0;
+}
+#header p {
+  margin: 5px;
+}
+#header a {
+  color: #FFFF00;
+}
+#editor-control {
+  padding: 5px;
+}
+#editor-control button {
+  margin-right: 5px;
+}
+#editor-control label {
+  margin: 5px 10px 0 5px;
+  display: inline;
+}
+#editor-control select {
+  margin-top: 5px;
 }
 
+#tabs {
+	position: absolute;
+	left: 0;
+	top: 0;
+	margin: 80px 0 0 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;	-moz-box-sizing: border-box;
+}
+
+#workspace {
+	width: 100%;
+}
 #editor-pane {
-	float: left;
-	margin-right: 30px;
+	overflow: hidden;
+	width: 400px;
 	background-color: #b0c4de;
 	height: 100%;
 	box-sizing: border-box;	-moz-box-sizing: border-box;
 }
 #form-pane {
+	position: relative;
 	display: inline-block;
 	background-color: #ffefd5;
 	padding: 0 10px 10px 5px;
 	box-sizing: border-box;	-moz-box-sizing: border-box;
+	overflow: scroll;
 }
-#editor { 
-	width: 400px;
-	height: 400px;
-	margin-bottom: 10px;
+#json-editor, #css-editor { 
+	width: 100%;
+	margin: 0;
+	padding: 0;
 	box-sizing: border-box;	-moz-box-sizing: border-box;
 }
 
 </style>
+<style id="form-css">
+</style>
 <script>
 $(function() {
-	var initialData = @Html(Include("app/data/sampleForm.json").replaceAll("//.*\n", "\n"));
-	var editor = new flect.app.FormEditor(initialData);
+	$("#template").val("@template");
+	var editor = new flect.app.FormEditor();
 });
 </script>
 <div id="header">
-	<h1>Form Generator</h1>
+	<h1>jQuery.formbuilder プラグイン</h1>
+	<p>
+		JSON形式の定義からエラーチェックを含むFormを生成します。
+	</p>
+	<p>
+		<a href="/assets/manual/ja/manual.html" target="_blank">リファレンス</a>
+	</p>
 </div>
 <div id="workspace">
 	<div id="editor-pane">
-		<h3>JSON定義</h3>
-		<p>
-		下の定義を編集して右のフォームを変更できます。
-		</p>
-		<p>
-		(JSONには本来コメントはありませんが、下のエディタ内では使用できます。)
-		</p>
-		<div id="editor">@Include("app/data/sampleForm.json")</div>
-		<div>
-			<button id="test" class="btn btn-primary">生成</button>
+		<div id="editor-control">
+			<button id="bootstrap" class="btn btn-warning" data-enable="@bootstrap">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
+			<button id="submit" class="btn btn-primary">チェック</button>
+			<br>
+			<label>テンプレート</label>
+			<select id="template">
+				<option value="sample1.json">シンプル</option>
+				<option value="sampleForm.json">いろいろ</option>
+			</select>
 		</div>
-		<div id="bootstrap-control">
-			<a class="btn btn-warning" href="/sample?bootstrap=@(!bootstrap)">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
+		<div id="tabs">
+			<ul>
+				<li><a href="#json-editor">JSON</a></li>
+				<li><a href="#css-editor">CSS</a></li>
+			</ul>
+			<div id="json-editor">@Include("app/data/" + template)</div>
+			<div id="css-editor">@Include("target/scala-2.10/resource_managed/main/public/stylesheets/jquery.formbuilder.css")</div>
 		</div>
 	</div>
 	<div id="form-pane">
-		<h3>フォーム</h3>
 		<form id="sampleForm" action="#">
 		</form>
-		<button id="submit" class="btn btn-primary">チェック</button>
 	</div>    
 </div>
 }

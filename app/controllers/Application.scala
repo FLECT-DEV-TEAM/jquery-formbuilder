@@ -1,7 +1,8 @@
 package controllers
 
-import play.api._
-import play.api.mvc._
+import play.api.mvc.Action;
+import play.api.mvc.Controller;
+import java.io.File;
 
 object Application extends Controller {
   
@@ -11,6 +12,10 @@ object Application extends Controller {
 
   def sample = Action { implicit request =>
     val bootstrap = request.getQueryString("bootstrap").getOrElse("true").toBoolean;
-    Ok(views.html.sample(bootstrap));
+    val template = request.getQueryString("template") match {
+      case Some(s)  => println(new File("app/data/" + s).exists); s;
+      case _ => "sample1.json";
+    }
+    Ok(views.html.sample(bootstrap, template));
   }
 }
