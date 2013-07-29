@@ -111,7 +111,7 @@ $(function() {
 			
 			var b = $("#bootstrap").attr("data-enable") == "true",
 				template = $("#template").val();
-			location.href = "/sample?bootstrap=" + !b + "&template=" + template;
+			location.href = "/editor?bootstrap=" + !b + "&template=" + template;
 		});
 		$("#submit").click(function() {
 			if ($form.validate().form()) {
@@ -124,7 +124,7 @@ $(function() {
 			
 			var b = $("#bootstrap").attr("data-enable") == "true",
 				template = $("#template").val();
-			location.href = "/sample?bootstrap=" + b + "&template=" + template;
+			location.href = "/editor?bootstrap=" + b + "&template=" + template;
 		});
 	}
 });
