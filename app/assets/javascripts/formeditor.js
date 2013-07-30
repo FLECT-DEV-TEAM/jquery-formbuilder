@@ -2,6 +2,32 @@ if (typeof(flect) == "undefined") flect = {};
 if (typeof(flect.app) == "undefined") flect.app = {};
 
 $(function() {
+	function ColorPicker(id) {
+		var $el = $(id),
+			callback = null;
+		
+		$el.change(function() {
+			if (callback) {
+				callback.call(this, $(this).val());
+			}
+		});
+		function isColorStr(s) {
+			return /^[a-zA-Z0-9]{6}$/.test(s);
+		}
+		function select(func) {
+			var self = this;
+			callback = function(s) {
+				func.call(self,s);
+				callback = null;
+			}
+			$el.click();
+		}
+		$.extend(this, {
+			"isColorStr" : isColorStr,
+			"select" : select
+		});
+	}
+	
 	flect.app.FormEditor = function() {
 		$("body").fixedDiv({
 			"orientation" : "vertical"
@@ -17,6 +43,7 @@ $(function() {
 		var $form = $("#sampleForm"),
 		    jsonEditor = ace.edit("json-editor"),
 		    cssEditor = ace.edit("css-editor"),
+		    colorPicker = new ColorPicker("#color"),
 			$tabs = $("#tabs").tabs({
 				"activate": function(event, ui) {
 					setTimeout(function(){
@@ -114,7 +141,6 @@ $(function() {
 			location.href = "/editor?bootstrap=" + !b + "&template=" + template;
 		});
 		$("#submit").click(function() {
-console.log(JSON.stringify(builder.getJson()));
 			if (builder.validate()) {
 				alert("エラーはありません");
 			}
@@ -126,6 +152,15 @@ console.log(JSON.stringify(builder.getJson()));
 			var b = $("#bootstrap").attr("data-enable") == "true",
 				template = $("#template").val();
 			location.href = "/editor?bootstrap=" + b + "&template=" + template;
+		});
+		
+		$("#css-editor").dblclick(function() {
+			var text = cssEditor.session.getTextRange(cssEditor.getSelectionRange());
+			if (colorPicker.isColorStr(text)) {
+				colorPicker.select(function(s) {
+					cssEditor.insert(s.substring(1));
+				});
+			}
 		});
 	}
 });
