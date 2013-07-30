@@ -22,9 +22,13 @@ $(function() {
 			}
 			$el.click();
 		}
+		function val(s) {
+			$el.val(s);
+		}
 		$.extend(this, {
 			"isColorStr" : isColorStr,
-			"select" : select
+			"select" : select,
+			"val" : val
 		});
 	}
 	
@@ -157,6 +161,7 @@ $(function() {
 		$("#css-editor").dblclick(function() {
 			var text = cssEditor.session.getTextRange(cssEditor.getSelectionRange());
 			if (colorPicker.isColorStr(text)) {
+				colorPicker.val("#" + text);
 				colorPicker.select(function(s) {
 					cssEditor.insert(s.substring(1));
 				});
