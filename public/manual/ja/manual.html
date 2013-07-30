@@ -703,6 +703,34 @@ var form = $("#form").formbuilder(json);
 	</section>
 </section>
 <section>
+	<h1>生成されるフォームの構造</h1>
+	<p>
+		生成されるフォームの基本構造は以下のようになります。
+	</p>
+			<code><pre>
+&lt;form <em>class="formbuilder-form"</em>>
+    &lt;fieldset>
+        &lt;legend>{title}&lt;/legend>
+        &lt;ul>
+            &lt;li>
+                &lt;label <em>class="formbuilder-label"</em>>{items.itemname.label}&lt;label>
+                &lt;input <em>class="formbuilder-input"</em>/>
+            &lt;/li>
+        &lt;/ul>
+    &lt;fieldset>
+&lt;/form>
+</pre></code>
+	<ul>
+		<li>引数としたform要素には「formbuilder-form」クラスが付加されます。</li>
+		<li>JSONに定義したtitleはfieldset/titleになります。</li>
+		<li>各アイテムは一つずつliの下にlabelと共に生成されます。</li>
+		<li>複数のcheckbox、radioはinline-blockなspan要素の下にまとめられます。</li>
+		<li>アイテムに「follow: true」を定義した場合は直前のliにマージされます。<br>
+		    この場合labelのクラス名は「formbuilder-label-follow」になります。</li>
+		<li>「labelBreak: true」を定義した場合はlabelの後ろに「&lt;br>」が付加されます。</li>
+	</ul>
+</section>
+<section>
 	<h1>WYSIWYGエディタ</h1>
 	<p>
 		WYSIWYGエディタはブラウザ上でformbuilder用のJSONを編集できるツールです。
@@ -716,6 +744,9 @@ var form = $("#form").formbuilder(json);
 		<li><a href="http://twitter.github.io/bootstrap/">Twitter Bootstrap</a>のスタイルを適用するか否かの切り替え</li>
 		<li>適用するCSSの編集</li>
 	</ul>
+	<p>
+		CSSに表示されるのは本プラグインのデフォルトのCSSです。
+	</p>
 </section>
 <section>
 	<h1>フォームのメソッド</h1>

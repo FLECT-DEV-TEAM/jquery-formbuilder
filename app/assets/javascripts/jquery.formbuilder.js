@@ -263,9 +263,9 @@
 	resources - Localized messages for labels and messages.
 	*/
 	$.fn.formbuilder = function(options, resources) {
-		var $form = $(this),
+		var $form = $(this).addClass("formbuilder-form"),
 			$fieldset = $("<fieldset/>"),
-			$ul = $("<ul class='formbuilder-form'/>"),
+			$ul = $("<ul/>"),
 			rules = {},
 			idPrefix = options.idPrefix || "",
 			validateOptions = $.extend(true, {
@@ -712,15 +712,16 @@
 					break;
 			}
 			if ($input) {
+				$input.addClass("formbuilder-input");
 				var $li = null,
 					$label = $("<label/>");
 				if (values.follow) {
 					$li = $form.find("li:last");
-					$label.addClass("form-label-follow");
+					$label.addClass("formbuilder-label-follow");
 				} else {
 					$li = $("<li/>");
 					$ul.append($li);
-					$label.addClass("form-label");
+					$label.addClass("formbuilder-label");
 				}
 				if (options.labelWidth) {
 					$label.css("width", options.labelWidth);
