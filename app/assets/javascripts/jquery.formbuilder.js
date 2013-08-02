@@ -61,7 +61,7 @@
 		//正規表現
 		$.validator.addMethod("regexp", function(value, element, param) {
 			return this.optional(element) || new RegExp(param).test(value);
-		}, "「Please enter \"{0}\" format.");
+		}, "Please enter \"{0}\" format.");
 		
 		//複数項目のいずれかが必須
 		$.validator.messages.requiredOne = "At least onf of {0} is required.";
