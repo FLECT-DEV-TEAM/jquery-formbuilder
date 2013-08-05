@@ -25,7 +25,7 @@
 	(function addValidateMethods() {
 		//全角ひらがなのみ
 		$.validator.addMethod("hiragana", function(value, element) {
-			return this.optional(element) || /^([ぁ-ん]+)$/.test(value);
+			return this.optional(element) || /^([ぁ-んー]+)$/.test(value);
 		}, "Please enter only Hiragana.");
 
 		//全角カタカナのみ
@@ -51,7 +51,7 @@
 		//郵便番号（例:012-3456）
 		$.validator.addMethod("postcode", function(value, element) {
 			return this.optional(element) || /^¥d{3}¥-¥d{4}$/.test(value);
-		}, "Please enter a valid postcode");
+		}, "Please enter a valid postcode.");
 
 		//電話番号（例:010-2345-6789）
 		$.validator.addMethod("tel", function(value, element) {

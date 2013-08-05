@@ -803,6 +803,24 @@ var form = $("#form").formbuilder(json);
 	</ul>
 	-->
 </section>
+<section>
+	<h1>サーバーサイドでのエラーチェック</h1>
+	<p>
+		<a href="https://github.com/shunjikonishi/form-validation">form-validation</a>ライブラリを使用することでフォーム定義に使用するJSONからサーバーサイドのJavaコードでエラーチェックを行うことが可能です。
+	</p>
+	<code><pre>
+String json;
+Map<String, String[]> parameters;
+
+FormDefinition form = FormDefinition.fromJson(json);
+ValidationResult result = form.validate(parameters);
+if (result.hasError()) {
+    for (String msg : result.getMessages()) {
+        //Process errors
+    }
+}
+</pre></code>
+</section>
 <footer>
 	<div class="copy-right">
 		COPYRIGHT（C）FLECT CO.,LTD. ALL RIGHTS RESERVED
