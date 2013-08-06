@@ -741,6 +741,9 @@
 				if (values.rules && !$.isEmptyObject(values.rules)) {
 					rules[key] = values.rules;
 				}
+				if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
+					$label.append(options.requiredAppendix);
+				}
 				if (values.follow) {
 					var group = getValidateOptionsHolder("groups"),
 						gname = "",
@@ -765,10 +768,10 @@
 				labels = "",
 				msg = null;
 			if (typeof(names) === "object") {
-				names = names.names;
 				if (names.message) {
 					msg = names.message;
 				}
+				names = names.value;
 			}
 			if (typeof(names) === "string") {
 				names = names.split(",");
@@ -818,6 +821,8 @@
 				default:
 					if ($.isFunction(values)) {
 						//ToDo
+					} else if (typeof(values) == "object") {
+						$.each(values, buildRelationalRules);
 					}
 			}
 		}

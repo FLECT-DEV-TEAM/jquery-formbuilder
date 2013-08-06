@@ -499,8 +499,8 @@ var form = $("#form").formbuilder(json);
 		</section>
 		<section>
 			<h1>最大値、最小値(max, min)</h1>
-			<p class="datatype">データ型： number</p>
-			<p>数値項目の最大値、最小値を指定します。</p>
+			<p class="datatype">データ型： number または date</p>
+			<p>数値または日付項目の最大値、最小値を指定します。</p>
 		</section>
 		<section>
 			<h1>文字列の長さ(minlength, maxlength)</h1>
@@ -685,6 +685,11 @@ var form = $("#form").formbuilder(json);
 				<td>trueを指定した場合console.logにデバッグログが出力されます。</td>
 			</tr>
 			<tr>
+				<td>requiredAppendix</td>
+				<td>string</td>
+				<td>必須項目のラベルに付加する文字列。HTMLが使用できます。</td>
+			</tr>
+			<tr>
 				<td>labelWidth</td>
 				<td>stringまたはnumber</td>
 				<td>ラベルの幅を指定します。</td>
@@ -814,7 +819,7 @@ Map<String, String[]> parameters;
 
 FormDefinition form = FormDefinition.fromJson(json);
 ValidationResult result = form.validate(parameters);
-if (result.hasError()) {
+if (result.hasErrors()) {
     for (String msg : result.getMessages()) {
         //Process errors
     }

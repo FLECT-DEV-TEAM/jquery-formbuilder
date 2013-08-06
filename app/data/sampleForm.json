@@ -170,6 +170,14 @@
 			"label" : "会社電話",
 			"tel" : true
 		},
+		"fax1" : {
+			"label" : "Fax",
+			"tel" : true
+		},
+		"fax2" : {
+			"label" : "会社Fax",
+			"tel" : true
+		},
 		"text": {
 			"label": "説明",
 			"type": "textarea",
@@ -208,7 +216,14 @@
 	},
 	"title" : "たいとる",
 	"debug" : true,
+	"requiredAppendix" : "<span style='color:red;'>(*)</span>",
 	"rules" : {
-		"requiredOne": "tel1,tel2,tel3"
+		"requiredOne": "tel1,tel2,tel3",
+		"fax" : {
+			"requiredOne" : {
+				"value" : "fax1,fax2",
+				"message" : "Faxはどちらかが必須です。"
+			}
+		}
 	}
 }
