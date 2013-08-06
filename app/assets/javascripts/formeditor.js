@@ -136,6 +136,16 @@ $(function() {
 				$("#form-css").text(text);
 			}
 		}
+		function gotoLine(name) {
+			var text = jsonEditor.getValue().split("\n");
+			name = "\"" + name + "\"";
+			for (var i=0; i<text.length; i++) {
+				if (text[i].indexOf(name) >= 0) {
+					jsonEditor.gotoLine(i + 1);
+					break;
+				}
+			}
+		}
 		$("#bootstrap").click(function() {
 			sessionStorage.setItem("template", jsonEditor.getValue());
 			sessionStorage.setItem("css", cssEditor.getValue());
@@ -166,6 +176,10 @@ $(function() {
 					cssEditor.insert(s.substring(1));
 				});
 			}
+		});
+		$form.find(":input").focus(function() {
+			var name = $(this).attr("name");
+			gotoLine(name);
 		});
 	}
 });
