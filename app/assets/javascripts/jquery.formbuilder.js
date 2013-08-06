@@ -833,6 +833,11 @@
 			$.each(options.rules, buildRelationalRules);
 		}
 		if ($.fn.validate && rules) {
+			if (options.disableImmediateCheck) {
+				validateOptions.onfocusout = false;
+				validateOptions.onkeyup = false;
+				validateOptions.onclick = false;
+			}
 			validateOptions.rules = rules;
 			debug("validateOptions: ", validateOptions);
 			validator = $form.validate(validateOptions);
