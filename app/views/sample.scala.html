@@ -95,6 +95,9 @@ body {
 </style>
 <script>
 $(function() {
+	if ($.fn.button.noConflict) {
+		$.fn.button.noConflict();
+	}
 	$("#template").val("@template");
 	var editor = new flect.app.FormEditor();
 });
@@ -112,7 +115,8 @@ $(function() {
 	<div id="editor-pane">
 		<div id="editor-control">
 			<button id="bootstrap" class="btn btn-warning" data-enable="@bootstrap">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
-			<button id="submit" class="btn btn-primary">チェック</button>
+			<button id="submit" class="btn btn-primary">チェック(js)</button>
+			<button id="submit2" class="btn btn-primary">チェック(server)</button>
 			<br>
 			<label>テンプレート</label>
 			<select id="template">
@@ -136,4 +140,8 @@ $(function() {
 </div>
 <input type="color" id="color"/>
 <a href="https://github.com/shunjikonishi/jquery-formbuilder"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
+<div id="resultDialog">
+	<ul id="resultList">
+	</ul>
+</div>
 }

@@ -146,6 +146,24 @@ $(function() {
 				}
 			}
 		}
+		function showDialog(data) {
+			var title = data.success ? "Success" : "Error",
+				$ul = $("#resultList").empty();
+			if (data.messages) {
+				$.each(data.messages, function(name, msgs) {
+					var $li = $("<li><label></label><span></span></li>");
+					$li.find("label").text(name);
+					$li.find("span").html(msgs.join("<br>"));
+					$ul.append($li);
+				});
+			}
+			$("#resultDialog").dialog({
+				"title" : title,
+				"height" : 400,
+				"width" : 600,
+				"modal" : true
+			});
+		}
 		$("#bootstrap").click(function() {
 			sessionStorage.setItem("template", jsonEditor.getValue());
 			sessionStorage.setItem("css", cssEditor.getValue());
@@ -158,6 +176,20 @@ $(function() {
 			if (builder.validate()) {
 				alert("エラーはありません");
 			}
+		});
+		$("#submit2").click(function() {
+			var json = builder.getJson();
+			$.ajax({
+				"url" : "/validate",
+				"type" : "POST",
+				"data" : {
+					"formDef" : jsonEditor.getValue(),
+					"formData" : JSON.stringify(json)
+				},
+				"success" : function(data) {
+					showDialog(data);
+				}
+			});
 		});
 		$("#template").change(function() {
 			sessionStorage.removeItem("template");
