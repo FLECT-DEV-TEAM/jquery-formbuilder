@@ -21,6 +21,7 @@
 			"class" : "input-mini",
 			"size" : 5,
 			"follow" : true,
+			"title" : "名前を入力する",
 			"placeholder" : "名"
 		},
 		"lastname_kana": {
@@ -216,6 +217,7 @@
 	},
 	"title" : "たいとる",
 	"debug" : true,
+	"tooltip" : true,
 	"requiredAppendix" : "<span style='color:red;'>(*)</span>",
 	"rules" : {
 		"requiredOne": "tel1,tel2,tel3",

@@ -409,6 +409,7 @@
 				case "autocomplete":
 				case "list":
 				case "placeholder":
+				case "title":
 					return "attrs";
 				case "requiredIf":
 					return "rules";
@@ -623,6 +624,9 @@
 				} else {
 					$input.attr(prop, value);
 				}
+			}
+			if (options.tooltip && attrs.title) {
+				$input.tooltip();
 			}
 		}
 		function buildForm(key, values) {
