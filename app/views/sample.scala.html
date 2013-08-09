@@ -1,4 +1,4 @@
-@(bootstrap: Boolean, template: String)
+@(bootstrap: Boolean, template: String)(implicit lang: Lang)
 @import jp.co.flect.play2.tags.Include
 
 @base("jquery.formbuilder") {
@@ -33,10 +33,6 @@ body {
 }
 #header p {
 	margin: 5px 0 0 20px;
-}
-#header a {
-	color: #FFFF00;
-	font-weight: bold;
 }
 #editor-control {
 	padding: 5px;
@@ -90,6 +86,17 @@ body {
 	top: -1000px;
 	left: -1000px;
 }
+
+.menu ul,.menu li { margin:0; padding:0; }
+.menu li {list-style:none;float:left;}
+.menu li.separator {display:block;width:20px;}
+
+.menu a { display:block;margin:0 auto;color:#fff;text-decoration:none; background:url(/assets/images/_right.png) right top no-repeat;}
+
+.menu a span { display:block;text-align:center;background:url(/assets/images/_left.png) left top no-repeat; font:bold 12px/30px Arial, Helvetica, sans-serif;  padding:0 20px; }
+	
+.menu a:hover { background-position:right bottom;text-decoration:underline}
+.menu a:hover span { background-position:left bottom;  }
 </style>
 <style id="form-css">
 </style>
@@ -103,25 +110,33 @@ $(function() {
 });
 </script>
 <div id="header">
-	<h1>jQuery.formbuilder プラグイン</h1>
+	<h1>jQuery.formbuilder @Messages("plugin")</h1>
 	<p>
-		JSON形式の定義からエラーチェックを含むFormを生成します。
+		@Messages("pluginDescription")
 	</p>
-	<p>
-		<a href="/assets/manual/ja/manual.html" target="_blank">リファレンス</a>
-	</p>
+	<div class="menu">
+		<ul>
+	    	<li><a href="#" id="bootstrap" data-enable="@bootstrap"><span>@if(bootstrap){@Messages("disableBootstrap")}else{@Messages("enableBootstrap")}</span></a></li>
+	    	<li class="separator">&nbsp;</li>
+	    	<li><a href="#" id="saveJson"><span>@{Messages("save")}(JSON)</span></a></li>
+	    	<li><a href="#" id="saveCss"><span>@{Messages("save")}(CSS)</span></a></li>
+	    	<li><a href="#" id="salesforce"><span>@Messages("generateSalesforce")</span></a></li>
+	    	<li class="separator">&nbsp;</li>
+	    	<li><a href="/i18n/setlang?lang=@if(lang.language == "ja"){en}else{ja}"><span>@if(lang.language == "ja"){English}else{日本語}</span></a></li>
+	    	<li><a href="/assets/manual/ja/manual.html" target="_blank"><span>@Messages("reference")</span></a></li>
+		</ul>
+	</div>
 </div>
 <div id="workspace">
 	<div id="editor-pane">
-		<div id="editor-control">
-			<button id="bootstrap" class="btn btn-warning" data-enable="@bootstrap">Bootstrapを@if(bootstrap){無効}else{有効}にする</a>
-			<button id="submit" class="btn btn-primary">チェック(js)</button>
-			<button id="submit2" class="btn btn-primary">チェック(server)</button>
+		<div id="editor-control" class="menu">
+			<button id="submit" class="btn btn-primary">@{Messages("check")}(js)</button>
+			<button id="submit2" class="btn btn-primary">@{Messages("check")}(server)</button>
 			<br>
-			<label>テンプレート</label>
+			<label>@Messages("template")</label>
 			<select id="template">
-				<option value="sample1.json">シンプル</option>
-				<option value="sampleForm.json">いろいろ</option>
+				<option value="sample1.json">@Messages("simple")</option>
+				<option value="sampleForm.json">@Messages("forTest")</option>
 			</select>
 		</div>
 		<div id="tabs">
@@ -144,4 +159,7 @@ $(function() {
 	<ul id="resultList">
 	</ul>
 </div>
+<form id="downloadForm" action="#" method="POST">
+	<input type="hidden" name="text"/>
+</form>
 }

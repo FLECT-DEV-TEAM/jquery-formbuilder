@@ -1,0 +1,11 @@
+check=Check
+disableBootstrap=Disable Bootstrap
+enableBootstrap=Enable Bootstrap
+forTest=For test
+generateSalesforce=Generate Salesforce object
+plugin=Plugin
+pluginDescription=A jQuery plugin to generate a web form with validation from JSON.
+reference=Reference
+save=Save
+simple=Simple
+template=Template

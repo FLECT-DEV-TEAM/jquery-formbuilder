@@ -1,0 +1,33 @@
+plugin=Plugin
+plugin[ja]=プラグイン
+
+pluginDescription=A jQuery plugin to generate a web form with validation from JSON.
+pluginDescription[ja]=JSON形式の定義からエラーチェックを含むFormを生成します。
+
+enableBootstrap=Enable Bootstrap
+enableBootstrap[ja]=Bootstrapを有効にする
+
+disableBootstrap=Disable Bootstrap
+disableBootstrap[ja]=Bootstrapを無効にする
+
+save=Save
+save[ja]=保存
+
+generateSalesforce=Generate Salesforce object
+generateSalesforce[ja]=Salesforceオブジェクト生成
+
+reference=Reference
+reference[ja]=リファレンス
+
+check=Check
+check[ja]=チェック
+
+template=Template
+template[ja]=テンプレート
+
+simple=Simple
+simple[ja]=シンプル
+
+forTest=For test
+forTest[ja]=テスト用
+

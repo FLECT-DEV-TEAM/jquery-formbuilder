@@ -1,0 +1,11 @@
+check=チェック
+disableBootstrap=Bootstrapを無効にする
+enableBootstrap=Bootstrapを有効にする
+forTest=テスト用
+generateSalesforce=Salesforceオブジェクト生成
+plugin=プラグイン
+pluginDescription=JSON形式の定義からエラーチェックを含むFormを生成します。
+reference=リファレンス
+save=保存
+simple=シンプル
+template=テンプレート

@@ -156,6 +156,10 @@ $(function() {
 					$li.find("span").html(msgs.join("<br>"));
 					$ul.append($li);
 				});
+			} else {
+				var $li = $("<li><span></span></li>");
+				$li.find("span").html("No errors.");
+				$ul.append($li);
 			}
 			$("#resultDialog").dialog({
 				"title" : title,
@@ -163,6 +167,12 @@ $(function() {
 				"width" : 600,
 				"modal" : true
 			});
+		}
+		function save(name, text) {
+			var form = $("#downloadForm");
+			form.attr("action", "/download/" + name);
+			form.find(":input[name=text]").val(text);
+			form[0].submit();
 		}
 		$("#bootstrap").click(function() {
 			sessionStorage.setItem("template", jsonEditor.getValue());
@@ -172,9 +182,18 @@ $(function() {
 				template = $("#template").val();
 			location.href = "/editor?bootstrap=" + !b + "&template=" + template;
 		});
+		$("#saveJson").click(function() {
+			save("form.json", jsonEditor.getValue());
+		});
+		$("#saveCss").click(function() {
+			save("style.css", cssEditor.getValue());
+		});
+		$("#salesforce").click(function() {
+			alert("Not implemented yet.");
+		});
 		$("#submit").click(function() {
 			if (builder.validate()) {
-				alert("エラーはありません");
+				alert("No errors.");
 			}
 		});
 		$("#submit2").click(function() {

@@ -68,4 +68,13 @@ object Application extends Controller {
       case _ => Map[String, Array[String]]();
     }
   }
+  
+  def downloadText = Action { implicit request =>
+    request.body.asFormUrlEncoded.flatMap {
+      _.get("text").map(_.head)
+    } match {
+      case Some(s) => Ok(s).as("application/octet-stream");
+      case None => BadRequest;
+    }
+  }
 }
