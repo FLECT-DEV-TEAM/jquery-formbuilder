@@ -3,11 +3,9 @@ package controllers
 import play.api.mvc.Action;
 import play.api.mvc.Controller;
 import java.io.File;
-import play.api.libs.json._;
 import play.api.data.Form;
 import play.api.data.Forms.tuple;
 import play.api.data.Forms.text;
-import scala.collection.JavaConversions._
 
 import jp.co.flect.formvalidation.FormDefinition;
 
@@ -39,33 +37,8 @@ object Application extends Controller {
       BadRequest;
     } else {
       val (formDef, formData) = form.get;
-      val map = jsonToMap(formData);
-      val result = FormDefinition.fromJson(formDef).validate(map);
+      val result = FormDefinition.fromJson(formDef).validate(formData);
       Ok(result.toJson).as("application/json; charset=utf-8");
-    }
-  }
-  
-  private def jsonToMap(str: String): scala.collection.Map[String, Array[String]] = {
-    val json = Json.parse(str);
-    json match {
-      case obj: JsObject => 
-        obj.value.mapValues{ value =>
-          value match {
-            case s: JsString => Array(s.value.toString);
-            case b: JsBoolean => Array(b.value.toString);
-            case n: JsNumber => Array(n.value.toString);
-            case a: JsArray => a.value.map{ value =>
-              value match {
-                case s: JsString => s.value.toString;
-                case b: JsBoolean => b.value.toString;
-                case n: JsNumber => n.value.toString;
-                case _ => "";
-              }
-            }.toArray;
-            case _ => Array("");
-          }
-        }
-      case _ => Map[String, Array[String]]();
     }
   }
   

@@ -1,0 +1,24 @@
+@(oauth: jp.co.flect.net.OAuth2)(implicit lang: Lang)
+
+@base("Login to Salesforce") {
+<div>
+	<label for="chkSandbox">Use sandbox</label><input type="checkbox" id="chkSandbox"/>
+	<br>
+	<button id="btnLogin">Login</button>
+</div>
+<script>
+$(function() {
+	$("#btnLogin").click(function() {
+		var href = "@oauth.getLoginUrl";
+		href = href.replace(/&amp;/g, "&");
+		
+		var sandbox = $("#chkSandbox").is(":checked");
+		if (sandbox) {
+			href = href.replace("login.salesforce.com", "test.salesforce.com") + "%3Fsandbox%3Dtrue";
+		}
+		console.log(href);
+		location.href = href;
+	})
+});
+</script>
+}

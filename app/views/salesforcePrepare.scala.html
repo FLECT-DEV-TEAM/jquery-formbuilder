@@ -1,0 +1,20 @@
+@()(implicit lang: Lang)
+
+@base("Login to Salesforce") {
+<div>
+	<form action="/salesforce/create" method="POST">
+		<ul>
+			<li><label for="name">Name</label><input name="name"/></li>
+			<li><label for="label">Label</label><input name="label"/></li>
+			<li><label for="description">Description</label><input name="description"/></li>
+		</ul>
+		<input id="json" type="hidden" name="json"/>
+		<input type="submit" value="Create"/>
+	</form>
+</div>
+<script>
+$(function() {
+	$("#json").val(sessionStorage.getItem("template"));
+});
+</script>
+}

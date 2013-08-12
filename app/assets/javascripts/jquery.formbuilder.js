@@ -735,6 +735,9 @@
 				} else {
 					$label.html(values.label);
 				}
+				if ($input.length == 1) {
+					$label.attr("for", $input.attr("id"));
+				}
 				if (type != "hidden") {
 					$li.append($label);
 				}

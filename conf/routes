@@ -13,5 +13,9 @@ POST    /download/style.css         controllers.Application.downloadText
 GET     /i18n/setlang               controllers.I18N.setLang(lang)
 GET     /i18n/:lang/messages.js     controllers.I18N.messages(lang)
 
+GET     /salesforce/prepare         controllers.Salesforce.prepare
+GET     /salesforce/login           controllers.Salesforce.login(code?="", sandbox: Boolean?=false)
+POST    /salesforce/create           controllers.Salesforce.create
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
