@@ -16,9 +16,10 @@ import play.api.data.Forms.optional;
 
 import java.io.File;
 
+import jp.co.flect.formvalidation.salesforce.SalesforceObjectBuilder;
+import jp.co.flect.formvalidation.salesforce.SalesforceInfo;
 import jp.co.flect.salesforce.SalesforceClient;
-import jp.co.flect.salesforce.metadata.CustomObject;
-import jp.co.flect.salesforce.metadata.CustomField;
+import jp.co.flect.log.Level;
 import jp.co.flect.play2.utils.Params;
 import jp.co.flect.net.OAuth2;
 
@@ -72,6 +73,7 @@ object Salesforce extends Controller {
     } else {
       val res = oauth.authenticate(code);
       val client = new SalesforceClient(baseClient);
+      client.getLogger.setLevel(Level.TRACE);
       if (sandbox) {
         val endpoint = client.getEndpoint().replace("login.salesforce.com", "test.salesforce.com");
         client.setEndpoint(endpoint);
@@ -99,21 +101,13 @@ object Salesforce extends Controller {
       val (name, label, desc, json) = form.get;
       Cache.getAs[SalesforceClient](cacheKey) match {
         case Some(client) =>
-          val metaClient = client.createMetadataClient(new File("conf/salesforce/metadata.wsdl"));
+          val builder = new SalesforceObjectBuilder(client, new File("conf/salesforce/metadata.wsdl"));
+          val info = new SalesforceInfo(name);
+          label.foreach(info.setLabel(_));
+          desc.foreach(info.setDescription(_));
           
-          val fullname = name + "__c";
-          val obj = new CustomObject();
-          obj.setFullName(fullname);
-          obj.setLabel(label.getOrElse(name));
-          desc.foreach(obj.setDescription(_));
-          
-          val nameField = new CustomField(CustomField.FieldType.AutoNumber, fullname, "Name");
-          nameField.setDisplayFormat("{00000}");
-          obj.setNameField(nameField);
-          
-          val ret = metaClient.create(obj);
-          
-          Ok(ret.isDone + ", " + ret.getId);
+          builder.generate(info, json);
+          Ok("OK");
         case None =>
           Redirect("/salesforce/login");
       }

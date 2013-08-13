@@ -396,6 +396,7 @@
 				case "values":
 				case "rules":
 				case "attrs":
+				case "salesforce":
 				case "selected":
 				case "checked":
 					return "top";
