@@ -51,7 +51,7 @@
 			"placeholder" : "カタカナで名を入力"
 		},
 		"mail": {
-			"label" : "E-Mail<span style='color:red;'>(必須)</span>",
+			"label" : "E-Mail",
 			"type": "text",
 			"rules" : {
 				"required": true,
