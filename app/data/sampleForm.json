@@ -82,13 +82,13 @@
 			"min" : "2000-01-01",
 			"max" : "2013-07-20"
 		},
-		"会社": "text",
-		"部署名": {
+		"corp": "text",
+		"department": {
 			"label" : "部署名",
 			"type" : "text",
 			"maxlength" : 20,
 			"requiredIf" : {
-				"value" : "会社==*",
+				"value" : "corp==*",
 				"message" : "会社名を入力した場合は必須です。"
 			}
 		},
