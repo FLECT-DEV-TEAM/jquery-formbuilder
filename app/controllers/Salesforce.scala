@@ -102,12 +102,17 @@ object Salesforce extends Controller {
       Cache.getAs[SalesforceClient](cacheKey) match {
         case Some(client) =>
           val builder = new SalesforceObjectBuilder(client, new File("conf/salesforce/metadata.wsdl"));
-          val info = new SalesforceInfo(name);
-          label.foreach(info.setLabel(_));
-          desc.foreach(info.setDescription(_));
-          
-          builder.generate(info, json);
-          Ok("OK");
+          try {
+            val info = new SalesforceInfo(name);
+            label.foreach(info.setLabel(_));
+            desc.foreach(info.setDescription(_));
+            
+            builder.generate(info, json);
+            Ok("OK");
+          } catch {
+            case e: Exception =>
+              Ok(e.getMessage);
+          }
         case None =>
           Redirect("/salesforce/login");
       }

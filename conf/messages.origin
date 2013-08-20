@@ -31,3 +31,33 @@ simple[ja]=シンプル
 forTest=For test
 forTest[ja]=テスト用
 
+cooperateSalesforce=Cooperate with Salesforce
+cooperateSalesforce[ja]=Salesforce連携
+
+login=Login
+login[ja]=ログイン
+
+useSandbox=Login to Sandbox
+useSandbox[ja]=Sandboxにログイン
+
+objectInfo=Object information
+objectInfo[ja]=オブジェクト情報
+
+objectName=ObjectName
+objectName[ja]=オブジェクト名
+
+label=Label
+label[ja]=ラベル
+
+description=Description
+description[ja]=説明
+
+generate=Generate
+generate[ja]=生成
+
+generateSalesforceObject=Generate Salesforce object
+generateSalesforceObject[ja]=Salesforce上にオブジェクトを生成
+
+finishGenerate=Generating Salesforce object is successfully complete.
+finishGenerate[ja]=Salesforceオブジェクトの生成に成功しました
+

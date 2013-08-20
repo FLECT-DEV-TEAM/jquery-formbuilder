@@ -839,6 +839,51 @@ if (result.hasErrors()) {
 }
 </pre></code>
 </section>
+<section>
+	<h1>Salesforceオブジェクトの生成</h1>
+	<p>
+		OAuth認証で任意のSalesforce組織に接続して、WYSIWYGエディタ上で編集しているJSONデータからSalesforceのオブジェクトを生成することができます。
+	</p>
+	<p>
+		生成される内容は以下です。
+	</p>
+	<ul>
+		<li>オブジェクト</li>
+		<li>フィールド<br>
+			<ul>
+				<li>radioはPicklistになります。</li>
+				<li>複数選択可能なcheckboxはMultiselectPicklistになります。</li>
+				<li>file, hiddenは無視されます。</li>
+				<li>equalToルールが設定されているpasswordは無視されます。(入力確認用のフィールドと推測されるため)</li>
+			</ul>
+		</li>
+		<li>入力規則<br>
+			<ul>
+				<li>設定したルールはSalesforceの入力規則に変換されますがすべてではありません。</li>
+				<li>例えばemailルールはSalesforceのメール型フィールドを使用することで代替されます。</li>
+				<li>現在、自分でエラーメッセージを設定しなかった場合のデフォルトのメッセージは英語になります。</li>
+			</ul>
+		</li>
+	</ul>
+	<p>
+		以下のものは自動では生成されないので、オブジェクト生成後にSalesforce設定画面から作成してください。
+	</p>
+	<ul>
+		<li>タブ<br>
+			<ul>
+				<li>プロファイルやアプリケーションとの関連付けが自動では行えないため自動生成できません。</li>
+			</ul>
+		</li>
+		<li>レイアウト<br>
+			<ul>
+				<li>現在レイアウトについてはMetadataAPIでの操作を行っていません。</li>
+				<li>MetadataAPIの標準動作として必須項目(required=true)のみを含むレイアウトが生成されます。</li>
+				<li>任意項目はレイアウトに含まれないので御自身で追加してください。</li>
+				<li>将来的にはWISIWYGエディタの見た目に近い形で自動生成できるようなるかもしれません。</li>
+			</ul>
+		</li>
+	</ul>
+</section>
 <footer>
 	<div class="copy-right">
 		COPYRIGHT（C）FLECT CO.,LTD. ALL RIGHTS RESERVED

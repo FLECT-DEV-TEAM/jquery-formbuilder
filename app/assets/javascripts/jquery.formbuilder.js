@@ -442,6 +442,17 @@
 		
 		function errorPlacement(label, element) {
 			var li = element.parents("li").get(0);
+			try {
+				if (options.errorBreak) {
+					var w = $(li).find("label:first").outerWidth() + 10;
+					$(label).css({
+						"display": "block",
+						"padding-left" : w
+					});
+				}
+			} catch (e) {
+				console.log(e);
+			}
 			$(li).append(label);
 		}
 		function addValidateMessage(key, name, msg) {

@@ -1,20 +1,61 @@
 @()(implicit lang: Lang)
 
-@base("Login to Salesforce") {
+@base(Messages("generateSalesforceObject")) {
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/jquery.formbuilder.css")">
+<script src="@routes.Assets.at("javascripts/ext/validation/jquery.validate.js")" type="text/javascript"></script>
+<script src="@routes.Assets.at("javascripts/jquery.formbuilder.js")" type="text/javascript"></script>
+<script src="@routes.Assets.at("javascripts/ext/validation/localization/messages_ja.js")" type="text/javascript"></script>
+<h1 class="dialog-h1">@Messages("generateSalesforceObject")</h1>
 <div>
 	<form action="/salesforce/create" method="POST">
-		<ul>
-			<li><label for="name">Name</label><input name="name"/></li>
-			<li><label for="label">Label</label><input name="label"/></li>
-			<li><label for="description">Description</label><input name="description"/></li>
-		</ul>
-		<input id="json" type="hidden" name="json"/>
-		<input type="submit" value="Create"/>
+		<button type="button" id="submit">@Messages("generate")</button>
 	</form>
 </div>
 <script>
 $(function() {
-	$("#json").val(sessionStorage.getItem("template"));
+	var json = sessionStorage.getItem("template"),
+		form = $("form").formbuilder({
+		"title" : "@Messages("objectInfo")",
+		"errorBreak" : true,
+		"items" : {
+			"name" : {
+				"label" : "@Messages("objectName")",
+				"required" : true,
+				"type" : "text"
+			},
+			"label" : {
+				"label" : "@Messages("label")",
+				"type" : "text"
+			},
+			"description" : {
+				"label" : "@Messages("description")",
+				"type" : "textarea",
+				"cols" : 40,
+				"rows" : 5
+			},
+			"json" : {
+				"type" : "hidden",
+				"value" : json
+			}
+		}
+	});
+	$("#submit").click(function() {
+		if (form.validate()) {
+			$.ajax({
+				"url" : "/salesforce/create",
+				"type" : "POST",
+				"data" : form.getJson(),
+				"success" : function(data) {
+					if (data == "OK") {
+						alert("@Messages("finishGenerate")");
+						window.close();
+					} else {
+						alert(data);
+					}
+				}
+			});
+		}
+	});
 });
 </script>
 }
