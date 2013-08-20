@@ -5,6 +5,7 @@ import play.api.mvc.Controller;
 import play.api.mvc.AnyContent;
 import play.api.mvc.Request;
 import play.api.mvc.Result;
+import play.api.Play;
 import play.api.Play.current;
 import play.api.cache.Cache;
 
@@ -39,6 +40,8 @@ object Salesforce extends Controller {
   def filterAction(f: Request[AnyContent] => Result): Action[AnyContent] = Action { request =>
     if (!enabled) {
       Ok("Not supported feature.");
+    } else if (Play.isProd && request.headers.get("x-forwarded-proto").getOrElse("http") == "http") {
+      Redirect("https://" + request.host + request.path);
     } else {
       f(request);
     }
