@@ -13,6 +13,7 @@ import play.api.data.Form;
 import play.api.data.Forms.tuple;
 import play.api.data.Forms.nonEmptyText;
 import play.api.data.Forms.text;
+import play.api.data.Forms.boolean;
 import play.api.data.Forms.optional;
 
 import java.io.File;
@@ -92,7 +93,9 @@ object Salesforce extends Controller {
       "name" -> nonEmptyText,
       "label" -> optional(text),
       "description" -> optional(text),
-      "json" -> nonEmptyText
+      "json" -> nonEmptyText,
+      "useEmailField" -> boolean,
+      "useUrlField" -> boolean
     )
   );
   
@@ -101,10 +104,12 @@ object Salesforce extends Controller {
     if (form.hasErrors) {
       BadRequest;
     } else {
-      val (name, label, desc, json) = form.get;
+      val (name, label, desc, json, useEmailField, useUrlField) = form.get;
       Cache.getAs[SalesforceClient](cacheKey) match {
         case Some(client) =>
           val builder = new SalesforceObjectBuilder(client, new File("conf/salesforce/metadata.wsdl"));
+          builder.setUseEmailField(useEmailField);
+          builder.setUseUrlField(useUrlField);
           try {
             val info = new SalesforceInfo(name);
             label.foreach(info.setLabel(_));

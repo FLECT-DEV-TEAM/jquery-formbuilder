@@ -190,7 +190,7 @@ $(function() {
 		});
 		$("#salesforce").click(function() {
 			sessionStorage.setItem("template", jsonEditor.getValue());
-			window.open("/salesforce/prepare", "", "width=600,height=400");
+			window.open("/salesforce/prepare", "", "width=640,height=480");
 		});
 		$("#submit").click(function() {
 			if (builder.validate()) {

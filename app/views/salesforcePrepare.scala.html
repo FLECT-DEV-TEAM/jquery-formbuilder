@@ -33,14 +33,28 @@ $(function() {
 				"cols" : 40,
 				"rows" : 5
 			},
+			"useEmailField" : {
+				"label" : " ",
+				"type" : "checkbox",
+				"values" : [ "true:@Messages("useEmailField")"],
+				"checked" : "true"
+			},
+			"useUrlField" : {
+				"label" : " ",
+				"type" : "checkbox",
+				"values" : [ "true:@Messages("useUrlField")"],
+				"checked" : "true"
+			},
 			"json" : {
 				"type" : "hidden",
 				"value" : json
 			}
 		}
 	});
-	$("#submit").click(function() {
+	var submit = $("#submit").click(function() {
 		if (form.validate()) {
+			submit.attr("disabled", "disabled");
+			$("body").css("cursor", "wait");
 			$.ajax({
 				"url" : "/salesforce/create",
 				"type" : "POST",
@@ -48,10 +62,14 @@ $(function() {
 				"success" : function(data) {
 					if (data == "OK") {
 						alert("@Messages("finishGenerate")");
-						window.close();
 					} else {
 						alert(data);
 					}
+					window.close();
+				}, 
+				"error" : function() {
+					submit.removeAttr("disabled");
+					$("body").css("cursor", "default");
 				}
 			});
 		}

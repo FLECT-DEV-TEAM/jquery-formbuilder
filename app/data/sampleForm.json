@@ -55,8 +55,17 @@
 			"type": "text",
 			"rules" : {
 				"required": true,
-				"maxlength": 256,
+				"maxlength": 255,
 				"email" : true
+			},
+			"class" : "input-xlarge",
+			"size" : 40
+		},
+		"url": {
+			"label" : "URL",
+			"type": "text",
+			"rules" : {
+				"url" : true
 			},
 			"class" : "input-xlarge",
 			"size" : 40

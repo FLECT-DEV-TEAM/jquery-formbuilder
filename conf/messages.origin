@@ -61,3 +61,8 @@ generateSalesforceObject[ja]=Salesforce上にオブジェクトを生成
 finishGenerate=Generating Salesforce object is successfully complete.
 finishGenerate[ja]=Salesforceオブジェクトの生成に成功しました
 
+useEmailField=Use email field type.
+useEmailField[ja]=Email型のフィールドを使用する
+
+useUrlField=Use url field type.
+useUrlField[ja]=Url型のフィールドを使用する

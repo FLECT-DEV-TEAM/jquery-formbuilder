@@ -18,4 +18,6 @@ reference=リファレンス
 save=保存
 simple=シンプル
 template=テンプレート
+useEmailField=Email型のフィールドを使用する
 useSandbox=Sandboxにログイン
+useUrlField=Url型のフィールドを使用する

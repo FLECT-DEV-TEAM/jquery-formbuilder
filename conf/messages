@@ -18,4 +18,6 @@ reference=Reference
 save=Save
 simple=Simple
 template=Template
+useEmailField=Use email field type.
 useSandbox=Login to Sandbox
+useUrlField=Use url field type.
