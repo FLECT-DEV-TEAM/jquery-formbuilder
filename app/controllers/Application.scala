@@ -2,6 +2,11 @@ package controllers
 
 import play.api.mvc.Action;
 import play.api.mvc.Controller;
+import play.api.mvc.AnyContent;
+import play.api.mvc.Request;
+import play.api.mvc.Result;
+import play.api.Play;
+import play.api.Play.current;
 import java.io.File;
 import play.api.data.Form;
 import play.api.data.Forms.tuple;
@@ -15,7 +20,15 @@ object Application extends Controller {
     Redirect("/editor");
   }
 
-  def editor = Action { implicit request =>
+  def filterAction(f: Request[AnyContent] => Result): Action[AnyContent] = Action { request =>
+    if (Play.isProd && request.headers.get("x-forwarded-proto").getOrElse("http") == "http") {
+      Redirect("https://" + request.host + request.path);
+    } else {
+      f(request);
+    }
+  }
+  
+  def editor = filterAction { implicit request =>
     val bootstrap = request.getQueryString("bootstrap").getOrElse("true").toBoolean;
     val template = request.getQueryString("template") match {
       case Some(s) if (new File("app/data/" + s).exists) => s;
@@ -31,7 +44,7 @@ object Application extends Controller {
     )
   );
   
-  def validate = Action { implicit request =>
+  def validate = filterAction { implicit request =>
     val form = validateForm.bindFromRequest;
     if (form.hasErrors) {
       BadRequest;
@@ -42,7 +55,7 @@ object Application extends Controller {
     }
   }
   
-  def downloadText = Action { implicit request =>
+  def downloadText = filterAction { implicit request =>
     request.body.asFormUrlEncoded.flatMap {
       _.get("text").map(_.head)
     } match {
