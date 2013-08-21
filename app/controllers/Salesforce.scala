@@ -102,6 +102,7 @@ object Salesforce extends Controller {
   def create = filterAction { implicit request =>
     val form = createForm.bindFromRequest;
     if (form.hasErrors) {
+println("Error: " + form.errors);
       BadRequest;
     } else {
       val (name, label, desc, json, useEmailField, useUrlField) = form.get;
