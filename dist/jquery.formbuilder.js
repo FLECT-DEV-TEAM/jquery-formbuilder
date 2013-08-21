@@ -25,7 +25,7 @@
 	(function addValidateMethods() {
 		//全角ひらがなのみ
 		$.validator.addMethod("hiragana", function(value, element) {
-			return this.optional(element) || /^([ぁ-ん]+)$/.test(value);
+			return this.optional(element) || /^([ぁ-んー]+)$/.test(value);
 		}, "Please enter only Hiragana.");
 
 		//全角カタカナのみ
@@ -51,7 +51,7 @@
 		//郵便番号（例:012-3456）
 		$.validator.addMethod("postcode", function(value, element) {
 			return this.optional(element) || /^¥d{3}¥-¥d{4}$/.test(value);
-		}, "Please enter a valid postcode");
+		}, "Please enter a valid postcode.");
 
 		//電話番号（例:010-2345-6789）
 		$.validator.addMethod("tel", function(value, element) {
@@ -61,7 +61,7 @@
 		//正規表現
 		$.validator.addMethod("regexp", function(value, element, param) {
 			return this.optional(element) || new RegExp(param).test(value);
-		}, "「Please enter \"{0}\" format.");
+		}, "Please enter \"{0}\" format.");
 		
 		//複数項目のいずれかが必須
 		$.validator.messages.requiredOne = "At least onf of {0} is required.";
@@ -396,6 +396,7 @@
 				case "values":
 				case "rules":
 				case "attrs":
+				case "salesforce":
 				case "selected":
 				case "checked":
 					return "top";
@@ -409,6 +410,7 @@
 				case "autocomplete":
 				case "list":
 				case "placeholder":
+				case "title":
 					return "attrs";
 				case "requiredIf":
 					return "rules";
@@ -440,6 +442,17 @@
 		
 		function errorPlacement(label, element) {
 			var li = element.parents("li").get(0);
+			try {
+				if (options.errorBreak) {
+					var w = $(li).find("label:first").outerWidth() + 10;
+					$(label).css({
+						"display": "block",
+						"padding-left" : w
+					});
+				}
+			} catch (e) {
+				console.log(e);
+			}
 			$(li).append(label);
 		}
 		function addValidateMessage(key, name, msg) {
@@ -624,6 +637,9 @@
 					$input.attr(prop, value);
 				}
 			}
+			if (options.tooltip && attrs.title) {
+				$input.tooltip();
+			}
 		}
 		function buildForm(key, values) {
 			if (typeof(values) === "string") {
@@ -731,6 +747,9 @@
 				} else {
 					$label.html(values.label);
 				}
+				if ($input.length == 1) {
+					$label.attr("for", $input.attr("id"));
+				}
 				if (type != "hidden") {
 					$li.append($label);
 				}
@@ -740,6 +759,9 @@
 				$li.append($target ? $target : $input);
 				if (values.rules && !$.isEmptyObject(values.rules)) {
 					rules[key] = values.rules;
+				}
+				if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
+					$label.append(options.requiredAppendix);
 				}
 				if (values.follow) {
 					var group = getValidateOptionsHolder("groups"),
@@ -765,10 +787,10 @@
 				labels = "",
 				msg = null;
 			if (typeof(names) === "object") {
-				names = names.names;
 				if (names.message) {
 					msg = names.message;
 				}
+				names = names.value;
 			}
 			if (typeof(names) === "string") {
 				names = names.split(",");
@@ -818,6 +840,8 @@
 				default:
 					if ($.isFunction(values)) {
 						//ToDo
+					} else if (typeof(values) == "object") {
+						$.each(values, buildRelationalRules);
 					}
 			}
 		}
@@ -828,6 +852,11 @@
 			$.each(options.rules, buildRelationalRules);
 		}
 		if ($.fn.validate && rules) {
+			if (options.disableImmediateCheck) {
+				validateOptions.onfocusout = false;
+				validateOptions.onkeyup = false;
+				validateOptions.onclick = false;
+			}
 			validateOptions.rules = rules;
 			debug("validateOptions: ", validateOptions);
 			validator = $form.validate(validateOptions);
