@@ -67,9 +67,15 @@ $(function() {
 					}
 					window.close();
 				}, 
-				"error" : function() {
+				"error" : function(xhr, txtStatus, thrown) {
 					submit.removeAttr("disabled");
 					$("body").css("cursor", "default");
+					if (xhr.status == 503) {
+						alert("@Messages("maybeTimeout")");
+						window.close();
+					} else {
+						alert("Unexpected error: " + xhr.status + ", " + txtStatus);
+					}
 				}
 			});
 		}

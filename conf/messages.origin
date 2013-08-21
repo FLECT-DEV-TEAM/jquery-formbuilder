@@ -66,3 +66,7 @@ useEmailField[ja]=Email型のフィールドを使用する
 
 useUrlField=Use url field type.
 useUrlField[ja]=Url型のフィールドを使用する
+
+maybeTimeout=Request timeouted.\\nPlease verify Salesforce object definition page.
+maybeTimeout[ja]=リクエストがタイムアウトしました。\\nSalesforceのオブジェクト定義画面を確認してください。
+
