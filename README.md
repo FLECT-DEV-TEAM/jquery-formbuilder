@@ -17,6 +17,10 @@ Sorry, now reference documentation is Japanese only.
 
 https://jquery-formbuilder.herokuapp.com/assets/manual/ja/manual.html
 
+License
+-------
+MIT
+
 See other
 ---------
 There is a server side validation library for Java using same JSON definition.
