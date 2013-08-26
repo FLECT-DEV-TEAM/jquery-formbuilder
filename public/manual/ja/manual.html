@@ -188,9 +188,12 @@ var form = $("#form").formbuilder(json);
 						<li>checkbox</li>
 						<li>textarea</li>
 						<li>date(jQuery-UIが必要です。)</li>
+						<li>--------------</li>
+						<li>group</li>
 					</ul>
 					<p>select, radio, checkboxでは項目を定義するために併せてvaluesを指定する必要があります。</p>
 					<p>type省略時には「text」となります。</p>
+					<p>type=「group」とした場合ラベルのみの行となります。</p>
 				</td>
 			</tr>
 			<tr>
@@ -241,6 +244,13 @@ var form = $("#form").formbuilder(json);
 				<td>
 					<p>項目を前の項目の後ろに続けて表示する場合にtrueを指定します。</p>
 					<p>例えば姓、名を個別に入力させる場合にそれらを1行で表示させることができます。</p>
+				</td>
+			</tr>
+			<tr>
+				<td>helpText</td>
+				<td>string</td>
+				<td>
+					<p>トップレベルで「helpImage」が指定されている場合に、ヘルプアイコンのマウスオーバーで表示するヘルプテキストを指定します。</p>
 				</td>
 			</tr>
 		</table>
@@ -711,6 +721,11 @@ var form = $("#form").formbuilder(json);
 				<td>labelBreak</td>
 				<td>boolean</td>
 				<td>trueを指定した場合ラベル出力後に改行します。</td>
+			</tr>
+			<tr>
+				<td>helpImage</td>
+				<td>string</td>
+				<td>ヘルプ画像のURLを指定すると、各項目の「helpText」で指定したテキストがインラインヘルプとして表示されます。</td>
 			</tr>
 			<tr>
 				<td>validateOptions</td>

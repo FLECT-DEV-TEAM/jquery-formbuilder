@@ -50,6 +50,7 @@
 			"katakana" : true,
 			"placeholder" : "カタカナで名を入力"
 		},
+	    "グループ" : "group",
 		"mail": {
 			"label" : "E-Mail",
 			"type": "text",
@@ -59,7 +60,8 @@
 				"email" : true
 			},
 			"class" : "input-xlarge",
-			"size" : 40
+			"size" : 40,
+			"helpText" : "メールアドレスを入力してください。"
 		},
 		"url": {
 			"label" : "URL",
@@ -68,7 +70,8 @@
 				"url" : true
 			},
 			"class" : "input-xlarge",
-			"size" : 40
+			"size" : 40,
+			"helpText" : "URLを入力してください。"
 		},
 		"password": {
 			"label": "パスワード",
@@ -227,7 +230,9 @@
 	"title" : "たいとる",
 	"debug" : true,
 	"tooltip" : true,
+	"helpImage" : "/assets/images/help.png",
 	"requiredAppendix" : "<span style='color:red;'>(*)</span>",
+	"labelWidth" : 150,
 	"rules" : {
 		"requiredOne": "tel1,tel2,tel3",
 		"fax" : {

@@ -399,6 +399,7 @@
 				case "salesforce":
 				case "selected":
 				case "checked":
+				case "helpText":
 					return "top";
 				case "class":
 				case "value":
@@ -723,6 +724,11 @@
 					})
 					setAttrs($input, values.attrs);
 					break;
+				case "group":
+					var $group = $("<li><label class='formbuilder-label-group'></label></li>");
+					$group.find("label").html(values.label);
+					$ul.append($group);
+					break;
 				default:
 					error("unknown type: " + key + ", " + type);
 					break;
@@ -762,6 +768,15 @@
 				}
 				if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
 					$label.append(options.requiredAppendix);
+				}
+				if (options.helpImage && values.helpText) {
+					var $helpImage = $("<img class='form-help-img'/>");
+					$helpImage.attr({
+						"src" : options.helpImage,
+						"title" : values.helpText
+					});
+					$label.append($helpImage);
+					$helpImage.tooltip();
 				}
 				if (values.follow) {
 					var group = getValidateOptionsHolder("groups"),
