@@ -399,6 +399,7 @@
 				case "salesforce":
 				case "selected":
 				case "checked":
+				case "helpText":
 					return "top";
 				case "class":
 				case "value":
@@ -723,6 +724,11 @@
 					})
 					setAttrs($input, values.attrs);
 					break;
+				case "group":
+					var $group = $("<li><label class='formbuilder-label-group'></label></li>");
+					$group.find("label").html(values.label);
+					$ul.append($group);
+					break;
 				default:
 					error("unknown type: " + key + ", " + type);
 					break;
@@ -737,7 +743,11 @@
 				} else {
 					$li = $("<li/>");
 					$ul.append($li);
-					$label.addClass("formbuilder-label");
+					if (options.labelBreak) {
+						$label.addClass("formbuilder-label-break");
+					} else {
+						$label.addClass("formbuilder-label");
+					}
 				}
 				if (options.labelWidth) {
 					$label.css("width", options.labelWidth);
@@ -753,15 +763,21 @@
 				if (type != "hidden") {
 					$li.append($label);
 				}
-				if (options.labelBreak) {
-					$li.append("<br>");
-				}
 				$li.append($target ? $target : $input);
 				if (values.rules && !$.isEmptyObject(values.rules)) {
 					rules[key] = values.rules;
 				}
 				if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
 					$label.append(options.requiredAppendix);
+				}
+				if (options.helpImage && values.helpText) {
+					var $helpImage = $("<img class='form-help-img'/>");
+					$helpImage.attr({
+						"src" : options.helpImage,
+						"title" : values.helpText
+					});
+					$label.append($helpImage);
+					$helpImage.tooltip();
 				}
 				if (values.follow) {
 					var group = getValidateOptionsHolder("groups"),

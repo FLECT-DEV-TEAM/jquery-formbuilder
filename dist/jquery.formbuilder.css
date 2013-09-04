@@ -20,6 +20,15 @@
   text-align: right;
   vertical-align: top;
 }
+.formbuilder-form li label.formbuilder-label-break {
+  display: block;
+  width: 90%;
+  margin-top: 20px;
+  margin-bottom: 5px;
+  margin-right: 10px;
+  text-align: left;
+  vertical-align: top;
+}
 .formbuilder-form li label.formbuilder-label-follow {
   display: inline-block;
   width: 80px;
@@ -38,4 +47,7 @@
 }
 .formbuilder-form li input + label {
   margin: 0 10px 0 2px;
+}
+.form-help-img {
+  margin-left: 5px;
 }

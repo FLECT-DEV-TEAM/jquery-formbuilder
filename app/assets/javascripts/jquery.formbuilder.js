@@ -743,7 +743,11 @@
 				} else {
 					$li = $("<li/>");
 					$ul.append($li);
-					$label.addClass("formbuilder-label");
+					if (options.labelBreak) {
+						$label.addClass("formbuilder-label-break");
+					} else {
+						$label.addClass("formbuilder-label");
+					}
 				}
 				if (options.labelWidth) {
 					$label.css("width", options.labelWidth);
@@ -758,9 +762,6 @@
 				}
 				if (type != "hidden") {
 					$li.append($label);
-				}
-				if (options.labelBreak) {
-					$li.append("<br>");
 				}
 				$li.append($target ? $target : $input);
 				if (values.rules && !$.isEmptyObject(values.rules)) {

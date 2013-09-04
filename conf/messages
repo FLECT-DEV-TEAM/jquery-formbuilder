@@ -3,6 +3,7 @@ cooperateSalesforce=Cooperate with Salesforce
 description=Description
 disableBootstrap=Disable Bootstrap
 enableBootstrap=Enable Bootstrap
+enq=Questionnaire
 finishGenerate=Generating Salesforce object is successfully complete.
 forTest=For test
 generate=Generate

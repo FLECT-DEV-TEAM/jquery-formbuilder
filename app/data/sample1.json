@@ -1,5 +1,6 @@
 {
 	"title" : "ユーザー登録",
+	"helpImage" : "/assets/images/help.png",
 	"items": {
 		"lastname": {
 			"label" : "姓",
@@ -43,9 +44,10 @@
 			"label": "パスワード",
 			"type": "password",
 			"required": true,
-			"digits": true,
+			"alphanum": true,
 			"minlength": 6,
-			"maxlength": 16
+			"maxlength": 16,
+			"helpText" : "6文字以上16文字以下の英数で設定してください。"
 		},
 		"password_confirm": {
 			"label": "パスワード(確認)",
@@ -57,8 +59,7 @@
 		"birthday": {
 			"label": "誕生日",
 			"type": "date",
-			"min" : "2000-01-01",
-			"max" : "2013-07-20"
+			"min" : "1900-01-01"
 		}
 	}
 }

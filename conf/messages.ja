@@ -3,6 +3,7 @@ cooperateSalesforce=Salesforce連携
 description=説明
 disableBootstrap=Bootstrapを無効にする
 enableBootstrap=Bootstrapを有効にする
+enq=アンケート
 finishGenerate=Salesforceオブジェクトの生成に成功しました
 forTest=テスト用
 generate=生成

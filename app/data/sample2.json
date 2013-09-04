@@ -1,0 +1,66 @@
+{
+	"title" : "アンケートっぽいサンプル",
+	"helpImage" : "/assets/images/help.png",
+	"labelBreak" : true,
+	"items": {
+		"nickname": {
+			"label" : "ニックネーム",
+			"type": "text",
+			"rules" : {
+				"required": true,
+				"maxlength": 10
+			},
+			"attrs": {
+				"class" : "input-midium",
+				"size" : 10
+			}
+		},
+		"mail": {
+			"label" : "メールアドレス",
+			"type": "text",
+			"rules" : {
+				"required": true,
+				"maxlength": 256,
+				"email" : true
+			},
+			"class" : "input-xlarge",
+			"size" : 40
+		},
+		"position": {
+			"label" : "エンジニアの種別としてあなたの立場に一番近いものを選択してください。",
+			"type": "select",
+			"rules" : {
+				"required": true
+			},
+			"values" : [
+				"職業プログラマ",
+				"日曜プログラマ",
+				"マネージャー",
+				"その他"
+			]
+		},
+		"rating": {
+			"label": "jQuery.formbuilderの評価として一番近いものを選択してください",
+			"type": "radio",
+			"rules" : {
+				"required": true
+			},
+			"values" : [
+				"5:素晴らしい",
+				"4:まぁまぁ使える",
+				"3:惜しい",
+				"2:びみょ～",
+				"1:ダメダメ"
+			],
+			"checked" : "3"
+		},
+		"comment": {
+			"label": "その他ご意見ご要望があればご自由にご記入ください。",
+			"type": "textarea",
+			"class": "input-xxlarge",
+			"cols" : 80,
+			"rows" : 5,
+			"placeholder" : "このアンケートはあくまでサンプルなので入力内容がどこかにフィードバックされることはありません。"
+		}
+	}
+}
