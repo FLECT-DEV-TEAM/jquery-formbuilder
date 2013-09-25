@@ -72,3 +72,6 @@ maybeTimeout[ja]=リクエストがタイムアウトしました。\\nSalesforc
 
 enq=Questionnaire
 enq[ja]=アンケート
+
+none=None
+none[ja]=なし

@@ -29,7 +29,7 @@ object Application extends Controller {
   }
   
   def editor = filterAction { implicit request =>
-    val bootstrap = request.getQueryString("bootstrap").getOrElse("true").toBoolean;
+    val bootstrap = request.getQueryString("bootstrap").getOrElse("2").toInt;
     val template = request.getQueryString("template") match {
       case Some(s) if (new File("app/data/" + s).exists) => s;
       case _ => "sample1.json";

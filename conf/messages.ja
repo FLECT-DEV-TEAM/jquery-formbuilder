@@ -12,6 +12,7 @@ generateSalesforceObject=Salesforce上にオブジェクトを生成
 label=ラベル
 login=ログイン
 maybeTimeout=リクエストがタイムアウトしました。\\nSalesforceのオブジェクト定義画面を確認してください。
+none=なし
 objectInfo=オブジェクト情報
 objectName=オブジェクト名
 plugin=プラグイン

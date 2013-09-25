@@ -12,6 +12,7 @@ generateSalesforceObject=Generate Salesforce object
 label=Label
 login=Login
 maybeTimeout=Request timeouted.\\nPlease verify Salesforce object definition page.
+none=None
 objectInfo=Object information
 objectName=ObjectName
 plugin=Plugin

@@ -174,14 +174,6 @@ $(function() {
 			form.find(":input[name=text]").val(text);
 			form[0].submit();
 		}
-		$("#bootstrap").click(function() {
-			sessionStorage.setItem("template", jsonEditor.getValue());
-			sessionStorage.setItem("css", cssEditor.getValue());
-			
-			var b = $("#bootstrap").attr("data-enable") == "true",
-				template = $("#template").val();
-			location.href = "/editor?bootstrap=" + !b + "&template=" + template;
-		});
 		$("#saveJson").click(function() {
 			save("form.json", jsonEditor.getValue());
 		});
@@ -215,7 +207,15 @@ $(function() {
 			sessionStorage.removeItem("template");
 			sessionStorage.removeItem("css");
 			
-			var b = $("#bootstrap").attr("data-enable") == "true",
+			var b = $("#bootstrap").val(),
+				template = $("#template").val();
+			location.href = "/editor?bootstrap=" + b + "&template=" + template;
+		});
+		$("#bootstrap").change(function() {
+			sessionStorage.setItem("template", jsonEditor.getValue());
+			sessionStorage.setItem("css", cssEditor.getValue());
+			
+			var b = $("#bootstrap").val(),
 				template = $("#template").val();
 			location.href = "/editor?bootstrap=" + b + "&template=" + template;
 		});
