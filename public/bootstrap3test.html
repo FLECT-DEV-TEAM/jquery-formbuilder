@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bootstrap3テスト</title>
+	<link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png">
+	<link rel="stylesheet" type="text/css" media="screen" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/redmond/jquery-ui.css" />
+	<link rel="stylesheet" media="screen" href="/assets/javascripts/ext/bootstrap3/css/bootstrap.css">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+	
+	<script src="/assets/javascripts/ext/bootstrap3/js/bootstrap.js" type="text/javascript"></script>
+	
+	<script src="/assets/javascripts/bootstrap-util.js"></script>
+</head>
+<body>
+<div class="container">
+	<h1>Bootstrap3 Form Test</h1>
+	<div class="row">
+		<form id="form">
+		</form>
+	</div>
+</div>
+<script>
+$(function() {
+	var form = new flect.util.Bootstrap3Form("#form", {
+		"horizontal": true,
+		"labeSize" : 2
+	});
+	form.addInput("hoge", "text", "ははは", {
+		"size" : 3
+	});
+	form.addInput("fuga", "password", "ひひひ");
+});
+</script>
+</body>
+</html>

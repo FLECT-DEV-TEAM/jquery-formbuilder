@@ -257,7 +257,8 @@
 	/*
 	options - Settings for formbuilder.
 	  dateFormat - Format for date type field.
-	  labelWidth - Width for field label
+	  bootstrap - bootstrap version. 2 or 3.
+	  labelWidth - Width for field label. if bootstrap == 3, this value means col size.
 	  rules - rules for relational items
 	  validateOptions - Options for jquery.validate
 	resources - Localized messages for labels and messages.
@@ -282,7 +283,9 @@
 		if (options.title) {
 			$("<legend/>").text(options.title).appendTo($fieldset);
 		}
-		$fieldset.append($ul);
+		if (options.bootstrap != 3) {
+			$fieldset.append($ul);
+		}
 		$form.prepend($fieldset);
 		
 		//Context for user defined function
@@ -400,6 +403,7 @@
 				case "selected":
 				case "checked":
 				case "helpText":
+				case "width":
 					return "top";
 				case "class":
 				case "value":
@@ -570,6 +574,11 @@
 			});
 		}
 		function buildSelect($select, options) {
+			if (options.labelBreak) {
+				$form.removeClass("form-horizontal");
+			} else {
+				$form.addClass("form-horizontal");
+			}
 			options = normalizeOptions(options);
 			var $group = null;
 			for (var i=0; i<options.length; i++) {
@@ -597,35 +606,63 @@
 				}
 			}
 		}
-		function buildCheckboxOrRadio(key, type, options) {
-			options = normalizeOptions(options);
-			var $span = $("<span style='display:inline-block;'/>");
-			for (var i=0; i<options.length; i++) {
-				var op = options[i],
-					$input = $("<input/>");
-				$input.attr({
-					name: key,
-					id: getId("input", key) + "-" + op.value,
-					type : type,
-					value : op.value
-				});
-				if (op.checked) {
-					$input.attr("checked", "checked");
-				}
-				if (op.disabled) {
-					$input.attr("disabled", "disabled");
-				}
-				if (op["break"]) {
-					$span.append("<br/>");
-				}
-				$span.append($input);
-				if (op.text) {
+		function buildCheckboxOrRadio(key, type, values) {
+			values = normalizeOptions(values);
+			if (options.bootstrap == 3) {
+				var $dummy = $("<div></div>");
+				for (var i=0; i<values.length; i++) {
+					var op = values[i],
+						$input = $("<input/>");
+					$input.attr({
+						name: key,
+						id: getId("input", key) + "-" + op.value,
+						type : type,
+						value : op.value
+					});
+					if (op.checked) {
+						$input.attr("checked", "checked");
+					}
+					if (op.disabled) {
+						$input.attr("disabled", "disabled");
+					}
 					var $label = $("<label/>");
-					$label.html(op.text);
-					$span.append($label);
+					if (op.text) {
+						$label.html(op.text);
+					}
+					$label.prepend($input);
+					$label.addClass(type + "-inline");
+					$dummy.append($label);
 				}
+				return $dummy.find("label");
+			} else {
+				var $span = $("<span style='display:inline-block;'/>");
+				for (var i=0; i<values.length; i++) {
+					var op = values[i],
+						$input = $("<input/>");
+					$input.attr({
+						name: key,
+						id: getId("input", key) + "-" + op.value,
+						type : type,
+						value : op.value
+					});
+					if (op.checked) {
+						$input.attr("checked", "checked");
+					}
+					if (op.disabled) {
+						$input.attr("disabled", "disabled");
+					}
+					if (op["break"]) {
+						$span.append("<br/>");
+					}
+					$span.append($input);
+					if (op.text) {
+						var $label = $("<label/>");
+						$label.html(op.text);
+						$span.append($label);
+					}
+				}
+				return $span;
 			}
-			return $span;
 		}
 		function setAttrs($input, attrs) {
 			for (var prop in attrs) {
@@ -735,22 +772,58 @@
 			}
 			if ($input) {
 				$input.addClass("formbuilder-input");
-				var $li = null,
-					$label = $("<label/>");
-				if (values.follow) {
-					$li = $form.find("li:last");
-					$label.addClass("formbuilder-label-follow");
-				} else {
-					$li = $("<li/>");
-					$ul.append($li);
-					if (options.labelBreak) {
-						$label.addClass("formbuilder-label-break");
+				var $label = $("<label/>");
+				if (options.bootstrap == 3) {
+					var $formGroup = $("<div></div>");
+					if (type == "radio" || type == "checkbox") {
+						$formGroup.addClass("form-group");
 					} else {
-						$label.addClass("formbuilder-label");
+						$formGroup.addClass("form-group");
+						$input.addClass("form-control");
+					}
+					
+					$formGroup.append($label);
+					if (options.labelBreak) {
+						$formGroup.append($target ? $target : $input);
+					} else {
+						var $inputDiv = $("<div></div>");
+						$inputDiv.append($target ? $target : $input);
+						$label.addClass("control-label");
+						$formGroup.append($inputDiv);
+						if (options.labelWidth) {
+							var w = parseInt(options.labelWidth);
+							if (isNaN(w) || w > 6) {
+								w = 3;
+							}
+							$label.addClass("col-sm-" + w);
+							$inputDiv.addClass("col-sm-" + (12 - w));
+						}
+					}
+					$fieldset.append($formGroup);
+				} else {
+					var $li = null;
+					if (values.follow) {
+						$li = $form.find("li:last");
+						$label.addClass("formbuilder-label-follow");
+					} else {
+						$li = $("<li/>");
+						$ul.append($li);
+						if (options.labelBreak) {
+							$label.addClass("formbuilder-label-break");
+						} else {
+							$label.addClass("formbuilder-label");
+						}
+					}
+					if (type != "hidden") {
+						$li.append($label);
+					}
+					$li.append($target ? $target : $input);
+					if (options.labelWidth) {
+						$label.css("width", options.labelWidth);
 					}
 				}
-				if (options.labelWidth) {
-					$label.css("width", options.labelWidth);
+				if (values.width) {
+					$input.css("width", values.width);
 				}
 				if (resources && resources[values.label]) {
 					$label.html(resources[values.label]);
@@ -760,10 +833,6 @@
 				if ($input.length == 1) {
 					$label.attr("for", $input.attr("id"));
 				}
-				if (type != "hidden") {
-					$li.append($label);
-				}
-				$li.append($target ? $target : $input);
 				if (values.rules && !$.isEmptyObject(values.rules)) {
 					rules[key] = values.rules;
 				}
@@ -783,15 +852,17 @@
 					var group = getValidateOptionsHolder("groups"),
 						gname = "",
 						gvalue = "";
-					$li.find(":input").each(function() {
-						if (gname.length > 0) {
-							gname += "_";
-							gvalue += " ";
-						}
-						var name = $(this).attr("name");
-						gname += name;
-						gvalue += name;
-					});
+					if (options.bootstrap != 3) {
+						$li.find(":input").each(function() {
+							if (gname.length > 0) {
+								gname += "_";
+								gvalue += " ";
+							}
+							var name = $(this).attr("name");
+							gname += name;
+							gvalue += name;
+						});
+					}
 					group[gname] = gvalue;
 				}
 			}
@@ -914,4 +985,5 @@
 			}
 		});
 	}
+	
 })(jQuery);
