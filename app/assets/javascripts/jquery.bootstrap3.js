@@ -55,7 +55,6 @@
 		var self = this;
 		function initProperties(hash) {
 			self.properties = $.extend(true, {}, defaultProperties, self.properties, hash);
-console.log(self.properties);
 		}
 		function doProperties(name, v) {
 			return property(self.properties, name, v);
@@ -119,9 +118,7 @@ console.log(self.properties);
 			options = values;
 			values = [];
 		}
-		this.initProperties(options);
-		this.name(name);
-		this.label(label);
+		this.__proto__ = new BasicInput(name, "select", label, options);
 		if (!values) {
 			values = [];
 		}
@@ -131,7 +128,6 @@ console.log(self.properties);
 			"addOption" : addOption
 		});
 	}
-	Select.prototype = new BasicInput(null, "select", null);
 	
 	function Textarea(name, label, rows, options) {
 		var self = this;
@@ -145,14 +141,11 @@ console.log(self.properties);
 		if (!options.rows) {
 			options.rows = rows || 3;
 		}
-		this.initProperties(options);
-		this.name(name);
-		this.label(label);
+		this.__proto__ = new BasicInput(name, "textarea", label, options);
 		$.extend(this, {
 			"rows" : function(v) { return self.doProperties("rows", v);}
 		});
 	}
-	Textarea.prototype = new BasicInput(null, "textarea", null);
 	
 	function Checkbox(name, label, values, options) {
 		var self = this;
@@ -171,7 +164,14 @@ console.log(self.properties);
 					"value" : op.value
 				});
 				$label.append($input).append(op.text);
-				$div.append($label);
+				if (self.inline()) {
+					$div.append($label);
+				} else {
+					var $childDiv = $("<div/>");
+					$childDiv.addClass(self.type());
+					$childDiv.append($label);
+					$div.append($childDiv);
+				}
 			}
 		}
 		function addValue(value, text) {
@@ -194,16 +194,13 @@ console.log(self.properties);
 		if (typeof(options.inline) === "undefined") {
 			options.inline = true;
 		}
-		this.initProperties(options);
-		this.name(name);
-		this.label(label);
+		this.__proto__ = new BasicInput(name, "checkbox", label, options);
 		$.extend(this, {
 			"build" : build,
 			"inline" : function(v) { return self.doProperties("inline", v);},
 			"addValue" : addValue
 		});
 	}
-	Checkbox.prototype = new BasicInput(null, "checkbox", null);
 	
 	
 	function Bootstrap3Form($form, options) {
@@ -299,9 +296,6 @@ console.log(self.properties);
 				
 				if (obj.type() == "checkbox" || obj.type() == "radio") {
 					var $childDiv = $("<div/>");
-					if (!obj.inline()) {
-						$childDiv.addClass(obj.type());
-					}
 					$childDiv.addClass(col(self.horizontal() ? 12 - labelSize : 12));
 					$div.append($childDiv);
 					obj.build($childDiv);
