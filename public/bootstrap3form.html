@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Bootstrap3テスト</title>
+	<link rel="stylesheet" type="text/css" media="screen" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/redmond/jquery-ui.css" />
+	<link rel="stylesheet" media="screen" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+	
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js" type="text/javascript"></script>
+	
+	<script src="javascripts/jquery.bootstrap3.js"></script>
+</head>
+<body>
+<div class="container">
+	<h1>Bootstrap3 Form Test</h1>
+	<div class="row">
+		<label>Horizontal</label>
+		<input type="radio" name="horizontal" value="true" checked>Yes
+		<input type="radio" name="horizontal" value="false">No
+	</div>
+	<div class="row">
+		<label>LabelSize</label>
+		<input type="range" name="labelSize" value="2" min="1" max="11">
+		<label id="labelSizeValue">2</label>
+	</div>
+	<hr>
+	<div class="row">
+		<form id="form">
+		</form>
+	</div>
+</div>
+<script>
+$(function() {
+	var form = $("#form").bootstrap3form({
+		"horizontal": true,
+		"labelSize" : 2
+	});
+	
+	var input1 = form.addInput("hoge", "text", "ははは", {
+		"size" : 3
+	});
+	input1.helpText("あいうえおかきくけこさしすせそたちつてとなにぬねの");
+	
+	var input2 = form.addInput("fuga", "text", "ひひひ")
+	input2.size(4);
+	input2.follow(true);
+	input2.placeHolder("hogehoge");
+	
+	var input3 = form.addInput("hahaha", "text", "ふふふ")
+	var select1 = form.addSelect("select", "セレクト", {
+		"size" : 3
+	})
+	select1.addOption("test", "hoge");
+	select1.addOption("test2:test2");
+	select1.addOption("test3");
+	select1.addOption({
+		"value" : "test4",
+		"text" : "テスト4"
+	});
+	var text = form.addTextarea("comment", "コメント", 5);
+	text.helpText("ご意見ご感想をご自由にどうぞ");
+	
+	var checkbox1 = form.addCheckbox("check1", "男子種目", [
+		"FX:床", 
+		"PH:あん馬", 
+		"SR:吊輪", 
+		"VT:跳馬", 
+		"PB:平行棒", 
+		"HB:鉄棒"
+	]);
+	var checkbox2 = form.addCheckbox("check2", "女子種目", [
+		"VT:跳馬", 
+		"UB:段違い平行棒", 
+		"BB:平均台", 
+		"FX:床"
+	]);
+	checkbox2.inline(false);
+console.log("checkbox1: " + JSON.stringify(checkbox1.properties));
+console.log("checkbox2: " + JSON.stringify(checkbox2.properties));
+	
+	form.generate();
+	
+	$(":input[name=horizontal]").click(function() {
+		var value = $(this).val();
+		form.horizontal(value === "true");
+		form.generate();
+	});
+	$(":input[name=labelSize]").change(function() {
+		var value = $(this).val();
+		$("#labelSizeValue").text(value);
+		form.labelSize(value);
+		form.generate();
+	});
+});
+</script>
+</body>
+</html>

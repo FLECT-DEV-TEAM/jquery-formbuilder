@@ -574,11 +574,6 @@
 			});
 		}
 		function buildSelect($select, options) {
-			if (options.labelBreak) {
-				$form.removeClass("form-horizontal");
-			} else {
-				$form.addClass("form-horizontal");
-			}
 			options = normalizeOptions(options);
 			var $group = null;
 			for (var i=0; i<options.length; i++) {
@@ -873,7 +868,7 @@
 				gvalue = "",
 				labels = "",
 				msg = null;
-			if (typeof(names) === "object") {
+			if ($.isPlainObject(names)) {
 				if (names.message) {
 					msg = names.message;
 				}
