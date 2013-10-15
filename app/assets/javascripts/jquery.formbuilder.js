@@ -266,27 +266,12 @@
 	$.fn.formbuilder = function(options, resources) {
 		var $form = $(this).addClass("formbuilder-form"),
 			$fieldset = $("<fieldset/>"),
-			$ul = $("<ul/>"),
 			rules = {},
 			idPrefix = options.idPrefix || "",
 			validateOptions = $.extend(true, {
 				"messages" : {}
 			}, options.validateOptions),
 			validator = null;
-		
-		if (options.debug) {
-			debugMode = true;
-		}
-		if (!validateOptions.errorPlacement) {
-			validateOptions.errorPlacement = errorPlacement;
-		}
-		if (options.title) {
-			$("<legend/>").text(options.title).appendTo($fieldset);
-		}
-		if (options.bootstrap != 3) {
-			$fieldset.append($ul);
-		}
-		$form.prepend($fieldset);
 		
 		//Context for user defined function
 		var context = {
@@ -343,6 +328,42 @@
 				return ret;
 			}
 		};
+		
+		if (options.debug) {
+			debugMode = true;
+		}
+		if (!validateOptions.errorPlacement) {
+			validateOptions.errorPlacement = errorPlacement;
+		}
+		if (options.title) {
+			$("<legend/>").text(options.title).appendTo($fieldset);
+		}
+		$form.prepend($fieldset);
+		if (isBootstrap3()) {
+			buildFormBS3();
+		} else {
+			buildFormNormal();
+		}
+		$.each(options.items, applyRules);
+		
+		if (options.rules) {
+			$.each(options.rules, buildRelationalRules);
+		}
+		if ($.fn.validate && rules) {
+			if (options.disableImmediateCheck) {
+				validateOptions.onfocusout = false;
+				validateOptions.onkeyup = false;
+				validateOptions.onclick = false;
+			}
+			validateOptions.rules = rules;
+			debug("validateOptions: ", validateOptions);
+			validator = $form.validate(validateOptions);
+		}
+		return new FormBuilder($form);
+		
+		function isBootstrap3() {
+			return $.fn.bootstrap3form;
+		}
 		function getValidateOptionsHolder(key) {
 			if (!validateOptions[key]) {
 				validateOptions[key] = {};
@@ -468,6 +489,11 @@
 			validateOptions.messages[key][name] = msg;
 		}
 		function normalizeItem(key, values) {
+			if (typeof(values) === "string") {
+				values = {
+					type : values
+				}
+			}
 			if (!values.label) {
 				values.label = key;
 			}
@@ -487,7 +513,12 @@
 					delete values[prop];
 				}
 			}
+			if (values.values) {
+				var selected = values.selected || values.checked;
+				normalizeOptions(values.values, values.type == "select" ? "selected" : "checked", selected);
+			}
 			normalizeRules(key, values.rules);
+			return values;
 		}
 		function normalizeRules(key, rules) {
 			$.each(rules, function(name, value) {
@@ -531,8 +562,11 @@
 				}
 			}
 		}
-		function normalizeOptions(options) {
-			var ret = [];
+		function normalizeOptions(options, selectedKey, selected) {
+			var array = null;
+			if (selected) {
+				array = ("" + selected).split(",");
+			}
 			for (var i=0; i<options.length; i++) {
 				var op = options[i];
 				
@@ -540,7 +574,6 @@
 					if (!op.text) {
 						op.text = op.value;
 					}
-					ret.push(op);
 				} else {
 					op = "" + op;
 					var idx = op.indexOf(":"),
@@ -553,14 +586,18 @@
 						value = op.substring(0, idx);
 						text = op.substring(idx+1);
 					}
-					ret.push({
+					op = {
 						value: value,
 						text: text
-					});
+					};
 				}
+				if (array != null && $.inArray(op.value, array) != -1) {
+					op[selectedKey] = true;
+				}
+				options[i] = op;
 			}
-			return ret;
 		}
+		/*
 		function setSelected($el, values, attr) {
 			var array = ("" + values).split(",");
 			$el.each(function() {
@@ -573,8 +610,8 @@
 				}
 			});
 		}
+		*/
 		function buildSelect($select, options) {
-			options = normalizeOptions(options);
 			var $group = null;
 			for (var i=0; i<options.length; i++) {
 				var op = options[i],
@@ -602,7 +639,6 @@
 			}
 		}
 		function buildCheckboxOrRadio(key, type, values) {
-			values = normalizeOptions(values);
 			if (options.bootstrap == 3) {
 				var $dummy = $("<div></div>");
 				for (var i=0; i<values.length; i++) {
@@ -674,128 +710,201 @@
 				$input.tooltip();
 			}
 		}
-		function buildForm(key, values) {
-			if (typeof(values) === "string") {
-				values = {
-					type : values
+		function buildFormBS3() {
+			var idPrefix = "input-",
+				properties = {
+					"horizontal" : !options.labelBreak,
+					"idPrefix" : idPrefix,
+					"labelSize" : 3,
+					"gridSize" : "sm"
+				},
+				bs3form = $fieldset.bootstrap3form(properties);
+			if (options.idPrefix) {
+				idPrefix = options.idPrefix + "-" + idPrefix;
+			}
+			$.each(options.items, function(key, values) {
+				values = normalizeItem(key, values);
+				var type = values.type,
+					label = values.label,
+					attrs = values.attrs,
+					size = 0;
+				
+				if (resources && resources[values.label]) {
+					label = resources[values.label];
 				}
-			}
-			normalizeItem(key, values);
-			var type = values.type,
-				$input = null,
-				$target = null;
-			
-			switch (type) {
-				case "text":
-				case "password":
-				case "hidden":
-				case "file":
-					$input = $("<input/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key),
-						type: type
+				if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
+					label += options.requiredAppendix;
+				}
+				if (options.helpImage && values.helpText) {
+					var $helpImage = $("<div><img class='form-help-img'/></div>");
+					$helpImage.find("img").attr({
+						"src" : options.helpImage,
+						"title" : values.helpText
 					})
-					setAttrs($input, values.attrs);
-					break;
-				case "date":
-					$input = $("<input/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key),
-						type: "text"
-					})
-					setAttrs($input, values.attrs);
-					var dateOptions = {
-						dateFormat: options.dateFormat || defaults.dateFormat,
-						onSelect: function() {
-							if (validator) {
-								validator.element("#" + context.getId(key));
-							}
+					label += $helpImage.html();
+				}
+				if (attrs && attrs.size) {
+					size = attrs.size;
+					delete attrs.size;
+				}
+				switch (type) {
+					case "text":
+					case "password":
+					case "file":
+					case "date":
+						bs3form.addInput(key, type == "date" ? "text" : type, label, {
+							"size" : size,
+							"follow" : values.follw,
+							"attr" : attrs
+						});
+						break;
+					case "hidden":
+						var hidden = $("<input type='hidden'/>");
+						hidden.attr({
+							"name" : key,
+							"id" : idPrefix + key
+						});
+						$fieldset.append(hidden);
+						break;
+					case "checkbox":
+					case "radio":
+						if (!values.values) {
+							values.values = [{ "value" : "true", "text" : ""}];
 						}
-					}
-					if (values.rules.min) {
-						dateOptions.minDate = values.rules.min;
-					}
-					if (values.rules.max) {
-						dateOptions.maxDate = values.rules.max;
-					}
-					
-					$input.datepicker(dateOptions);
-					values.rules.date = true;
-					break;
-				case "checkbox":
-				case "radio":
-					if (!values.values) {
-						values.values = ["true:"];
-					}
-					$target = buildCheckboxOrRadio(key, type, values.values);
-					$input = $target.find("input");
-					setAttrs($input, values.attrs);
-					if (values.checked) {
-						setSelected($input, values.checked, "checked");
-					}
-					break;
-				case "select":
-					$input = $("<select/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key)
-					});
-					setAttrs($input, values.attrs);
-					buildSelect($input, values.values);
-					if (values.selected) {
-						setSelected($input.find("option"), values.selected, "selected");
-					}
-					break;
-				case "textarea":
-					$input = $("<textarea/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key)
-					})
-					setAttrs($input, values.attrs);
-					break;
-				case "group":
-					var $group = $("<li><label class='formbuilder-label-group'></label></li>");
-					$group.find("label").html(values.label);
-					$ul.append($group);
-					break;
-				default:
-					error("unknown type: " + key + ", " + type);
-					break;
-			}
-			if ($input) {
-				$input.addClass("formbuilder-input");
-				var $label = $("<label/>");
-				if (options.bootstrap == 3) {
-					var $formGroup = $("<div></div>");
-					if (type == "radio" || type == "checkbox") {
-						$formGroup.addClass("form-group");
-					} else {
-						$formGroup.addClass("form-group");
-						$input.addClass("form-control");
-					}
-					
-					$formGroup.append($label);
-					if (options.labelBreak) {
-						$formGroup.append($target ? $target : $input);
-					} else {
-						var $inputDiv = $("<div></div>");
-						$inputDiv.append($target ? $target : $input);
-						$label.addClass("control-label");
-						$formGroup.append($inputDiv);
-						if (options.labelWidth) {
-							var w = parseInt(options.labelWidth);
-							if (isNaN(w) || w > 6) {
-								w = 3;
-							}
-							$label.addClass("col-sm-" + w);
-							$inputDiv.addClass("col-sm-" + (12 - w));
+						if (type == "checkbox") {
+							bs3form.addCheckbox(key, label, values.values, {
+								"size" : size,
+								"attr" : attrs
+							});
+						} else {
+							bs3form.addRadio(key, label, values.values, {
+								"size" : size,
+								"attr" : attrs
+							});
 						}
-					}
-					$fieldset.append($formGroup);
-				} else {
+						break;
+					case "select":
+						bs3form.addSelect(key, label, values.values, {
+							"size" : size,
+							"follow" : values.follw,
+							"attr" : attrs
+						});
+						break;
+					/*
+					case "textarea":
+						$input = $("<textarea/>");
+						$input.attr({
+							name: key,
+							id: getId("input", key)
+						})
+						setAttrs($input, values.attrs);
+						break;
+					case "group":
+						var $group = $("<li><label class='formbuilder-label-group'></label></li>");
+						$group.find("label").html(values.label);
+						$ul.append($group);
+						break;
+					*/
+					default:
+						error("unknown type: " + key + ", " + type);
+						break;
+				}
+				if (options.helpImage) {
+					$fieldset.find(".form-help-img").tooltip();
+				}
+			});
+			bs3form.generate();
+		}
+		function buildFormNormal() {
+			var $ul = $("<ul/>");
+			$fieldset.append($ul);
+			$.each(options.items, function(key, values) {
+				values = normalizeItem(key, values);
+				var type = values.type,
+					$input = null,
+					$target = null;
+				
+				switch (type) {
+					case "text":
+					case "password":
+					case "hidden":
+					case "file":
+					case "date":
+						$input = $("<input/>");
+						$input.attr({
+							name: key,
+							id: getId("input", key),
+							type: type == "date" ? "text" : type
+						})
+						setAttrs($input, values.attrs);
+						if (type === "date") {
+							var dateOptions = {
+								dateFormat: options.dateFormat || defaults.dateFormat,
+								onSelect: function() {
+									if (validator) {
+										validator.element("#" + context.getId(key));
+									}
+								}
+							}
+							if (values.rules.min) {
+								dateOptions.minDate = values.rules.min;
+							}
+							if (values.rules.max) {
+								dateOptions.maxDate = values.rules.max;
+							}
+							
+							$input.datepicker(dateOptions);
+							values.rules.date = true;
+						}
+						break;
+					case "checkbox":
+					case "radio":
+						if (!values.values) {
+							values.values = [{ "value" : "true", "text" : ""}];
+						}
+						$target = buildCheckboxOrRadio(key, type, values.values);
+						$input = $target.find("input");
+						setAttrs($input, values.attrs);
+						/*
+						if (values.checked) {
+							setSelected($input, values.checked, "checked");
+						}
+						*/
+						break;
+					case "select":
+						$input = $("<select/>");
+						$input.attr({
+							name: key,
+							id: getId("input", key)
+						});
+						setAttrs($input, values.attrs);
+						buildSelect($input, values.values);
+						/*
+						if (values.selected) {
+							setSelected($input.find("option"), values.selected, "selected");
+						}
+						*/
+						break;
+					case "textarea":
+						$input = $("<textarea/>");
+						$input.attr({
+							name: key,
+							id: getId("input", key)
+						})
+						setAttrs($input, values.attrs);
+						break;
+					case "group":
+						var $group = $("<li><label class='formbuilder-label-group'></label></li>");
+						$group.find("label").html(values.label);
+						$ul.append($group);
+						break;
+					default:
+						error("unknown type: " + key + ", " + type);
+						break;
+				}
+				if ($input) {
+					$input.addClass("formbuilder-input");
+					var $label = $("<label/>");
 					var $li = null;
 					if (values.follow) {
 						$li = $form.find("li:last");
@@ -816,51 +925,53 @@
 					if (options.labelWidth) {
 						$label.css("width", options.labelWidth);
 					}
-				}
-				if (values.width) {
-					$input.css("width", values.width);
-				}
-				if (resources && resources[values.label]) {
-					$label.html(resources[values.label]);
-				} else {
-					$label.html(values.label);
-				}
-				if ($input.length == 1) {
-					$label.attr("for", $input.attr("id"));
-				}
-				if (values.rules && !$.isEmptyObject(values.rules)) {
-					rules[key] = values.rules;
-				}
-				if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
-					$label.append(options.requiredAppendix);
-				}
-				if (options.helpImage && values.helpText) {
-					var $helpImage = $("<img class='form-help-img'/>");
-					$helpImage.attr({
-						"src" : options.helpImage,
-						"title" : values.helpText
-					});
-					$label.append($helpImage);
-					$helpImage.tooltip();
-				}
-				if (values.follow) {
-					var group = getValidateOptionsHolder("groups"),
-						gname = "",
-						gvalue = "";
-					if (options.bootstrap != 3) {
-						$li.find(":input").each(function() {
-							if (gname.length > 0) {
-								gname += "_";
-								gvalue += " ";
-							}
-							var name = $(this).attr("name");
-							gname += name;
-							gvalue += name;
-						});
+					if (values.width) {
+						$input.css("width", values.width);
 					}
-					group[gname] = gvalue;
+					if (resources && resources[values.label]) {
+						$label.html(resources[values.label]);
+					} else {
+						$label.html(values.label);
+					}
+					if ($input.length == 1) {
+						$label.attr("for", $input.attr("id"));
+					}
+					if (values.rules && !$.isEmptyObject(values.rules)) {
+						rules[key] = values.rules;
+					}
+					if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
+						$label.append(options.requiredAppendix);
+					}
+					if (options.helpImage && values.helpText) {
+						var $helpImage = $("<img class='form-help-img'/>");
+						$helpImage.attr({
+							"src" : options.helpImage,
+							"title" : values.helpText
+						});
+						$label.append($helpImage);
+						$helpImage.tooltip();
+					}
+					if (values.follow) {
+						var group = getValidateOptionsHolder("groups"),
+							gname = "",
+							gvalue = "";
+						if (options.bootstrap != 3) {
+							$li.find(":input").each(function() {
+								if (gname.length > 0) {
+									gname += "_";
+									gvalue += " ";
+								}
+								var name = $(this).attr("name");
+								gname += name;
+								gvalue += name;
+							});
+						}
+						group[gname] = gvalue;
+					}
 				}
-			}
+			});
+		}
+		function applyRules(key, value) {
 		}
 		function requiredOne(names) {
 			var group = getValidateOptionsHolder("groups"),
@@ -927,23 +1038,6 @@
 					}
 			}
 		}
-		if (options.items) {
-			$.each(options.items, buildForm);
-		}
-		if (options.rules) {
-			$.each(options.rules, buildRelationalRules);
-		}
-		if ($.fn.validate && rules) {
-			if (options.disableImmediateCheck) {
-				validateOptions.onfocusout = false;
-				validateOptions.onkeyup = false;
-				validateOptions.onclick = false;
-			}
-			validateOptions.rules = rules;
-			debug("validateOptions: ", validateOptions);
-			validator = $form.validate(validateOptions);
-		}
-		return new FormBuilder($form);
 	}
 	function FormBuilder($form) {
 		$.extend(this, {

@@ -42,7 +42,18 @@
 		}
 		return ret;
 	}
-	
+	function setAttrs($input, attrs) {
+		for (var prop in attrs) {
+			var value = attrs[prop];
+			if (prop == "class") {
+				$input.addClass(value);
+			} else if (prop == "value") {
+				$input.val(value);
+			} else {
+				$input.attr(prop, value);
+			}
+		}
+	}
 	
 	var defaultProperties = {
 		"size" : 0,
@@ -186,7 +197,7 @@
 					"value" : op.value
 				});
 				if (attrs) {
-					$input.attr(attrs);
+					setAttrs($input, attrs);
 				}
 				if (op.checked) {
 					$input.attr("checked", "checked");
@@ -247,7 +258,6 @@
 				"labelSize" : 3,
 				"gridSize" : "sm"
 			};
-		$form = $(form);
 		
 		if (options) {
 			$.extend(properties, options);
@@ -263,6 +273,7 @@
 		}
 		
 		function addInput(name, type, label, options) {
+console.log("addInput: " + name + ", " + type);
 			var obj = new BasicInput(name, type, label, options);
 			controls.push(obj);
 			return obj;
@@ -347,7 +358,7 @@
 						"name" : obj.name()
 					});
 					if (obj.attr()) {
-						$input.attr(obj.attr());
+						setAttrs($input, obj.attr());
 					}
 					$input.addClass("form-control");
 					$label.attr("for", id);
