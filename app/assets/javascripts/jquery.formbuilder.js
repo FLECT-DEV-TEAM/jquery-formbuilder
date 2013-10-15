@@ -275,11 +275,14 @@
 		
 		//Context for user defined function
 		var context = {
+			getInput: function(name) {
+				return $form.find(":input[name=" + name + "]");
+			},
 			getId: function(name) {
-				return $form.find(":input[name=" + name + "]").attr("id");
+				return this.getInput(name).attr("id");
 			},
 			getValue: function(name) {
-				var $input = $form.find(":input[name=" + name + "]");
+				var $input = this.getInput(name);
 				if ($input.length == 0) {
 					return null;
 				}
@@ -467,19 +470,24 @@
 		}
 		
 		function errorPlacement(label, element) {
-			var li = element.parents("li").get(0);
-			try {
-				if (options.errorBreak) {
-					var w = $(li).find("label:first").outerWidth() + 10;
-					$(label).css({
-						"display": "block",
-						"padding-left" : w
-					});
+			if (isBootstrap3()) {
+				var helpBlock = $fieldset.find(".help-block[data-for=" + element.attr("name") + "]");
+				helpBlock.append(label);
+			} else {
+				var li = element.parents("li").get(0);
+				try {
+					if (options.errorBreak) {
+						var w = $(li).find("label:first").outerWidth() + 10;
+						$(label).css({
+							"display": "block",
+							"padding-left" : w
+						});
+					}
+				} catch (e) {
+					console.log(e);
 				}
-			} catch (e) {
-				console.log(e);
+				$(li).append(label);
 			}
-			$(li).append(label);
 		}
 		function addValidateMessage(key, name, msg) {
 			debug("addValidateMessage: key=" + key + ", name=" + name + ", msg=", msg);
@@ -597,20 +605,6 @@
 				options[i] = op;
 			}
 		}
-		/*
-		function setSelected($el, values, attr) {
-			var array = ("" + values).split(",");
-			$el.each(function() {
-				var value = $(this).attr("value");
-				for (var i=0; i<array.length; i++) {
-					if (value == array[i]) {
-						$(this).attr(attr, attr);
-						break;
-					}
-				}
-			});
-		}
-		*/
 		function buildSelect($select, options) {
 			var $group = null;
 			for (var i=0; i<options.length; i++) {
@@ -639,61 +633,33 @@
 			}
 		}
 		function buildCheckboxOrRadio(key, type, values) {
-			if (options.bootstrap == 3) {
-				var $dummy = $("<div></div>");
-				for (var i=0; i<values.length; i++) {
-					var op = values[i],
-						$input = $("<input/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key) + "-" + op.value,
-						type : type,
-						value : op.value
-					});
-					if (op.checked) {
-						$input.attr("checked", "checked");
-					}
-					if (op.disabled) {
-						$input.attr("disabled", "disabled");
-					}
+			var $span = $("<span style='display:inline-block;'/>");
+			for (var i=0; i<values.length; i++) {
+				var op = values[i],
+					$input = $("<input/>");
+				$input.attr({
+					name: key,
+					id: getId("input", key) + "-" + op.value,
+					type : type,
+					value : op.value
+				});
+				if (op.checked) {
+					$input.attr("checked", "checked");
+				}
+				if (op.disabled) {
+					$input.attr("disabled", "disabled");
+				}
+				if (op["break"]) {
+					$span.append("<br/>");
+				}
+				$span.append($input);
+				if (op.text) {
 					var $label = $("<label/>");
-					if (op.text) {
-						$label.html(op.text);
-					}
-					$label.prepend($input);
-					$label.addClass(type + "-inline");
-					$dummy.append($label);
+					$label.html(op.text);
+					$span.append($label);
 				}
-				return $dummy.find("label");
-			} else {
-				var $span = $("<span style='display:inline-block;'/>");
-				for (var i=0; i<values.length; i++) {
-					var op = values[i],
-						$input = $("<input/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key) + "-" + op.value,
-						type : type,
-						value : op.value
-					});
-					if (op.checked) {
-						$input.attr("checked", "checked");
-					}
-					if (op.disabled) {
-						$input.attr("disabled", "disabled");
-					}
-					if (op["break"]) {
-						$span.append("<br/>");
-					}
-					$span.append($input);
-					if (op.text) {
-						var $label = $("<label/>");
-						$label.html(op.text);
-						$span.append($label);
-					}
-				}
-				return $span;
 			}
+			return $span;
 		}
 		function setAttrs($input, attrs) {
 			for (var prop in attrs) {
@@ -715,7 +681,7 @@
 				properties = {
 					"horizontal" : !options.labelBreak,
 					"idPrefix" : idPrefix,
-					"labelSize" : 3,
+					"labelSize" : 2,
 					"gridSize" : "sm"
 				},
 				bs3form = $fieldset.bootstrap3form(properties);
@@ -747,6 +713,10 @@
 					size = attrs.size;
 					delete attrs.size;
 				}
+				if (attrs && attrs.cols) {
+					size = attrs.cols;
+					delete attrs.cols;
+				}
 				switch (type) {
 					case "text":
 					case "password":
@@ -754,7 +724,8 @@
 					case "date":
 						bs3form.addInput(key, type == "date" ? "text" : type, label, {
 							"size" : size,
-							"follow" : values.follw,
+							"follow" : values.follow,
+							"helpText" : " ",
 							"attr" : attrs
 						});
 						break;
@@ -774,11 +745,13 @@
 						if (type == "checkbox") {
 							bs3form.addCheckbox(key, label, values.values, {
 								"size" : size,
+								"helpText" : " ",
 								"attr" : attrs
 							});
 						} else {
 							bs3form.addRadio(key, label, values.values, {
 								"size" : size,
+								"helpText" : " ",
 								"attr" : attrs
 							});
 						}
@@ -787,24 +760,21 @@
 						bs3form.addSelect(key, label, values.values, {
 							"size" : size,
 							"follow" : values.follw,
+							"helpText" : " ",
 							"attr" : attrs
 						});
 						break;
-					/*
 					case "textarea":
-						$input = $("<textarea/>");
-						$input.attr({
-							name: key,
-							id: getId("input", key)
-						})
-						setAttrs($input, values.attrs);
+						bs3form.addTextarea(key, label, 5, {
+							"size" : size,
+							"follow" : values.follw,
+							"helpText" : " ",
+							"attr" : attrs
+						});
 						break;
 					case "group":
-						var $group = $("<li><label class='formbuilder-label-group'></label></li>");
-						$group.find("label").html(values.label);
-						$ul.append($group);
+						bs3form.addStatic(label, "");
 						break;
-					*/
 					default:
 						error("unknown type: " + key + ", " + type);
 						break;
@@ -837,25 +807,6 @@
 							type: type == "date" ? "text" : type
 						})
 						setAttrs($input, values.attrs);
-						if (type === "date") {
-							var dateOptions = {
-								dateFormat: options.dateFormat || defaults.dateFormat,
-								onSelect: function() {
-									if (validator) {
-										validator.element("#" + context.getId(key));
-									}
-								}
-							}
-							if (values.rules.min) {
-								dateOptions.minDate = values.rules.min;
-							}
-							if (values.rules.max) {
-								dateOptions.maxDate = values.rules.max;
-							}
-							
-							$input.datepicker(dateOptions);
-							values.rules.date = true;
-						}
 						break;
 					case "checkbox":
 					case "radio":
@@ -865,11 +816,6 @@
 						$target = buildCheckboxOrRadio(key, type, values.values);
 						$input = $target.find("input");
 						setAttrs($input, values.attrs);
-						/*
-						if (values.checked) {
-							setSelected($input, values.checked, "checked");
-						}
-						*/
 						break;
 					case "select":
 						$input = $("<select/>");
@@ -879,11 +825,6 @@
 						});
 						setAttrs($input, values.attrs);
 						buildSelect($input, values.values);
-						/*
-						if (values.selected) {
-							setSelected($input.find("option"), values.selected, "selected");
-						}
-						*/
 						break;
 					case "textarea":
 						$input = $("<textarea/>");
@@ -936,9 +877,6 @@
 					if ($input.length == 1) {
 						$label.attr("for", $input.attr("id"));
 					}
-					if (values.rules && !$.isEmptyObject(values.rules)) {
-						rules[key] = values.rules;
-					}
 					if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
 						$label.append(options.requiredAppendix);
 					}
@@ -949,29 +887,53 @@
 							"title" : values.helpText
 						});
 						$label.append($helpImage);
-						$helpImage.tooltip();
 					}
 					if (values.follow) {
 						var group = getValidateOptionsHolder("groups"),
 							gname = "",
 							gvalue = "";
-						if (options.bootstrap != 3) {
-							$li.find(":input").each(function() {
-								if (gname.length > 0) {
-									gname += "_";
-									gvalue += " ";
-								}
-								var name = $(this).attr("name");
-								gname += name;
-								gvalue += name;
-							});
-						}
+						$li.find(":input").each(function() {
+							if (gname.length > 0) {
+								gname += "_";
+								gvalue += " ";
+							}
+							var name = $(this).attr("name");
+							gname += name;
+							gvalue += name;
+						});
 						group[gname] = gvalue;
 					}
 				}
 			});
 		}
-		function applyRules(key, value) {
+		function applyRules(key, values) {
+			var $input = context.getInput(key);
+			if (values.type == "date") {
+				var dateOptions = {
+					dateFormat: options.dateFormat || defaults.dateFormat,
+					onSelect: function() {
+						if (validator) {
+							validator.element("#" + context.getId(key));
+						}
+					}
+				}
+				if (values.rules.min) {
+					dateOptions.minDate = values.rules.min;
+				}
+				if (values.rules.max) {
+					dateOptions.maxDate = values.rules.max;
+				}
+				
+				$input.datepicker(dateOptions);
+				values.rules.date = true;
+			}
+			if (values.rules && !$.isEmptyObject(values.rules)) {
+				rules[key] = values.rules;
+			}
+			if (options.helpImage && values.helpText) {
+				var $helpImage = $fieldset.find("label[for=" + $input.attr("id") + "]").find("img");;
+				$helpImage.tooltip();
+			}
 		}
 		function requiredOne(names) {
 			var group = getValidateOptionsHolder("groups"),

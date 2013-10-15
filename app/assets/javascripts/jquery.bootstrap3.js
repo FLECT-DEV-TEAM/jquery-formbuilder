@@ -6,7 +6,7 @@
 			return properties[name];
 		} else {
 			properties[name] = value;
-			return self;
+			return this;
 		}
 	}
 	
@@ -110,6 +110,15 @@
 			"attr" : function(n, v) { return doAttrs(n, v);},
 			"initProperties" : initProperties,
 			"doProperties" : doProperties
+		});
+	}
+	function Static(label, text) {
+		var self = this;
+		this.__proto__ = new BasicInput("", "static", label, {
+			"text" : text
+		});
+		$.extend(this, {
+			"text" : function(v) { return self.doProperties("text", v);}
 		});
 	}
 	function Select(name, label, values, options) {
@@ -273,8 +282,12 @@
 		}
 		
 		function addInput(name, type, label, options) {
-console.log("addInput: " + name + ", " + type);
 			var obj = new BasicInput(name, type, label, options);
+			controls.push(obj);
+			return obj;
+		}
+		function addStatic(label, text) {
+			var obj = new Static(label, text);
 			controls.push(obj);
 			return obj;
 		}
@@ -342,6 +355,11 @@ console.log("addInput: " + name + ", " + type);
 				
 				if (obj.type() == "checkbox" || obj.type() == "radio") {
 					obj.build($inputDiv);
+				} else if (obj.type() == "static") {
+					$input = $("<p/>");
+					$input.addClass("form-control-static");
+					$input.html(obj.text());
+					$inputDiv.append($input);
 				} else {
 					if (obj.type() == "textarea") {
 						$input = $("<textarea/>");
@@ -367,6 +385,7 @@ console.log("addInput: " + name + ", " + type);
 				if (obj.helpText()) {
 					var helpBlock = $("<span/>");
 					helpBlock.addClass("help-block");
+					helpBlock.attr("data-for", obj.name());
 					helpBlock.html(obj.helpText());
 					if (self.horizontal()) {
 						if (isFollowGroup(index)) {
@@ -393,6 +412,7 @@ console.log("addInput: " + name + ", " + type);
 		}
 		$.extend(this, {
 			"addInput" : addInput,
+			"addStatic" : addStatic,
 			"addSelect" : addSelect,
 			"addCheckbox" : addCheckbox,
 			"addRadio" : addRadio,
