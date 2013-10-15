@@ -46,7 +46,6 @@
 	
 	var defaultProperties = {
 		"size" : 0,
-		"placeHolder" : null,
 		"helpText" : null,
 		"follow" : false,
 		"labelSize" : 0
@@ -56,8 +55,30 @@
 		function initProperties(hash) {
 			self.properties = $.extend(true, {}, defaultProperties, self.properties, hash);
 		}
-		function doProperties(name, v) {
-			return property(self.properties, name, v);
+		function doProperties(n, v) {
+			return property(self.properties, n, v);
+		}
+		function doAttrs(n, v) {
+			var t1 = typeof(n),
+				t2 = typeof(v);
+			if (t1 === "undefined") {
+				return property(self.properties, "attrs");
+			} else if (t1 === "object") {
+				return property(self.properties, "attrs", n);
+			} else if (t1 === "string") {
+				if (t2 === "undefined") {
+					var attrs = property(self.properties, "attrs");
+					return attrs ? attrs[n] : null;
+				} else if (t2 === "string") {
+					var attrs = property(self.properties, "attrs");
+					if (!attrs) {
+						attrs = {};
+					}
+					attrs[n] = v;
+					return property(self.properties, "attrs", attrs);
+				}
+			}
+			throw "Illegal arguments: " + n + ", " + v;
 		}
 		if (!options) {
 			options = {};
@@ -72,10 +93,10 @@
 			"type" : function(v) { return doProperties("type", v);},
 			"label" : function(v) { return doProperties("label", v);},
 			"size" : function(v) { return doProperties("size", v);},
-			"placeHolder" : function(v) { return doProperties("placeHolder", v);},
 			"helpText" : function(v) { return doProperties("helpText", v);},
 			"follow" : function(v) { return doProperties("follow", v);},
 			"labelSize" : function(v) { return doProperties("labelSize", v);},
+			"attr" : function(n, v) { return doAttrs(n, v);},
 			"initProperties" : initProperties,
 			"doProperties" : doProperties
 		});
@@ -147,10 +168,11 @@
 		});
 	}
 	
-	function Checkbox(name, label, values, options) {
+	function CheckboxOrRadio(type, name, label, values, options) {
 		var self = this;
 		
 		function build($div) {
+			var attrs = self.attr();
 			for (var i=0; i<values.length; i++) {
 				var op = values[i],
 					$label = $("<label/>"),
@@ -163,6 +185,12 @@
 					"type" : self.type(),
 					"value" : op.value
 				});
+				if (attrs) {
+					$input.attr(attrs);
+				}
+				if (op.checked) {
+					$input.attr("checked", "checked");
+				}
 				$label.append($input).append(op.text);
 				if (self.inline()) {
 					$div.append($label);
@@ -194,12 +222,19 @@
 		if (typeof(options.inline) === "undefined") {
 			options.inline = true;
 		}
-		this.__proto__ = new BasicInput(name, "checkbox", label, options);
+		this.__proto__ = new BasicInput(name, type, label, options);
 		$.extend(this, {
 			"build" : build,
 			"inline" : function(v) { return self.doProperties("inline", v);},
 			"addValue" : addValue
 		});
+	}
+	
+	function Checkbox(name, label, values, options) {
+		this.__proto__ = new CheckboxOrRadio("checkbox", name, label, values, options);
+	}
+	function Radio(name, label, values, options) {
+		this.__proto__ = new CheckboxOrRadio("radio", name, label, values, options);
 	}
 	
 	
@@ -247,14 +282,10 @@
 			controls.push(obj);
 			return obj;
 		}
-		function addRadio(name, type, label) {
-			var obj = {
-				"name" : name,
-				"type" : type,
-				"label" : label
-			};
+		function addRadio(name, label, values, options) {
+			var obj = new Radio(name, label, values, options);
 			controls.push(obj);
-			generate();
+			return obj;
 		}
 		function isFollowGroup(index) {
 			if (!self.horizontal()) {
@@ -294,11 +325,12 @@
 				}
 				$div.append($label);
 				
+				var $inputDiv = $("<div/>");
+				$inputDiv.addClass(col(obj.size() || (self.horizontal() ? 12 - labelSize : 12)));
+				$div.append($inputDiv);
+				
 				if (obj.type() == "checkbox" || obj.type() == "radio") {
-					var $childDiv = $("<div/>");
-					$childDiv.addClass(col(self.horizontal() ? 12 - labelSize : 12));
-					$div.append($childDiv);
-					obj.build($childDiv);
+					obj.build($inputDiv);
 				} else {
 					if (obj.type() == "textarea") {
 						$input = $("<textarea/>");
@@ -314,40 +346,35 @@
 						"id" : id,
 						"name" : obj.name()
 					});
-					$input.addClass("form-control");
-					if (obj.placeHolder()) {
-						$input.attr("placeholder", obj.placeHolder());
+					if (obj.attr()) {
+						$input.attr(obj.attr());
 					}
+					$input.addClass("form-control");
 					$label.attr("for", id);
-					
-					var $inputDiv = $("<div/>");
-					$inputDiv.addClass(col(obj.size() || (self.horizontal() ? 12 - labelSize : 12)));
 					$inputDiv.append($input);
-					$div.append($inputDiv);
-					
-					if (obj.helpText()) {
-						var helpBlock = $("<span/>");
-						helpBlock.addClass("help-block");
-						helpBlock.html(obj.helpText());
-						if (self.horizontal()) {
-							if (isFollowGroup(index)) {
-								$inputDiv.append(helpBlock);
-							} else {
-								helpBlock.addClass(col(12 - labelSize));
-								helpBlock.addClass(offset(labelSize));
-								$div.append(helpBlock);
-							}
+				}
+				if (obj.helpText()) {
+					var helpBlock = $("<span/>");
+					helpBlock.addClass("help-block");
+					helpBlock.html(obj.helpText());
+					if (self.horizontal()) {
+						if (isFollowGroup(index)) {
+							$inputDiv.append(helpBlock);
 						} else {
-							if (obj.size()) {
-								var dummy = $("<div/>");
-								dummy.addClass(col(12 - obj.size()));
-								dummy.addClass("dummy");
-								dummy.height($inputDiv.outerHeight());
-								$div.append(dummy);
-							}
-							helpBlock.addClass(col(12));
+							helpBlock.addClass(col(12 - labelSize));
+							helpBlock.addClass(offset(labelSize));
 							$div.append(helpBlock);
 						}
+					} else {
+						if (obj.size()) {
+							var dummy = $("<div/>");
+							dummy.addClass(col(12 - obj.size()));
+							dummy.addClass("dummy");
+							dummy.height($inputDiv.outerHeight());
+							$div.append(dummy);
+						}
+						helpBlock.addClass(col(12));
+						$div.append(helpBlock);
 					}
 				}
 			});

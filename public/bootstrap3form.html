@@ -47,7 +47,7 @@ $(function() {
 	var input2 = form.addInput("fuga", "text", "ひひひ")
 	input2.size(4);
 	input2.follow(true);
-	input2.placeHolder("hogehoge");
+	input2.attr("placeHolder", "hogehoge");
 	
 	var input3 = form.addInput("hahaha", "text", "ふふふ")
 	var select1 = form.addSelect("select", "セレクト", {
@@ -66,18 +66,20 @@ $(function() {
 	var checkbox1 = form.addCheckbox("check1", "男子種目", [
 		"FX:床", 
 		"PH:あん馬", 
-		"SR:吊輪", 
+		{ "value" : "SR", "text" : "吊輪", "checked" : true},
 		"VT:跳馬", 
 		"PB:平行棒", 
 		"HB:鉄棒"
 	]);
-	var checkbox2 = form.addCheckbox("check2", "女子種目", [
+	checkbox1.helpText("得意種目をチェックしてください");
+	var checkbox2 = form.addRadio("check2", "女子種目", [
 		"VT:跳馬", 
-		"UB:段違い平行棒", 
+		{ "value" : "UB", "text" : "段違い平行棒", "checked" : true},
 		"BB:平均台", 
 		"FX:床"
 	]);
 	checkbox2.inline(false);
+	checkbox2.helpText("得意種目をチェックしてください");
 console.log("checkbox1: " + JSON.stringify(checkbox1.properties));
 console.log("checkbox2: " + JSON.stringify(checkbox2.properties));
 	
