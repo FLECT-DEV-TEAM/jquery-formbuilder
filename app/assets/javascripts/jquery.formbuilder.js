@@ -338,6 +338,9 @@
 		if (!validateOptions.errorPlacement) {
 			validateOptions.errorPlacement = errorPlacement;
 		}
+		if (!validateOptions.success) {
+			validateOptions.success = success;
+		}
 		if (options.title) {
 			$("<legend/>").text(options.title).appendTo($fieldset);
 		}
@@ -468,10 +471,15 @@
 					return false;
 			}
 		}
-		
+		function success(label, element) {
+			if (isBootstrap3()) {
+				$(element).parents(".form-group").removeClass("has-error");
+			} 
+		}
 		function errorPlacement(label, element) {
 			if (isBootstrap3()) {
 				var helpBlock = $fieldset.find(".help-block[data-for=" + element.attr("name") + "]");
+				element.parents(".form-group").addClass("has-error");
 				helpBlock.append(label);
 			} else {
 				var li = element.parents("li").get(0);

@@ -91,6 +91,15 @@
 			}
 			throw "Illegal arguments: " + n + ", " + v;
 		}
+		function doHelpText(v) {
+			var ret = doProperties("helpText", v);
+			if (typeof(v) !== "undefined") {
+				var $input = self.input();
+				if ($input) {
+					//ToDo
+				}
+			}
+		}
 		if (!options) {
 			options = {};
 		}
@@ -104,10 +113,11 @@
 			"type" : function(v) { return doProperties("type", v);},
 			"label" : function(v) { return doProperties("label", v);},
 			"size" : function(v) { return doProperties("size", v);},
-			"helpText" : function(v) { return doProperties("helpText", v);},
 			"follow" : function(v) { return doProperties("follow", v);},
 			"labelSize" : function(v) { return doProperties("labelSize", v);},
 			"attr" : function(n, v) { return doAttrs(n, v);},
+			"input" : function(n, v) { return doProperties("input", v);},
+			"helpText" : function(v) { return doHelpText(v);},
 			"initProperties" : initProperties,
 			"doProperties" : doProperties
 		});
@@ -221,6 +231,7 @@
 					$div.append($childDiv);
 				}
 			}
+			return $div.find("input");
 		}
 		function addValue(value, text) {
 			if (typeof(value) === "string" && text) {
@@ -354,7 +365,7 @@
 				$div.append($inputDiv);
 				
 				if (obj.type() == "checkbox" || obj.type() == "radio") {
-					obj.build($inputDiv);
+					$input = obj.build($inputDiv);
 				} else if (obj.type() == "static") {
 					$input = $("<p/>");
 					$input.addClass("form-control-static");
@@ -382,6 +393,7 @@
 					$label.attr("for", id);
 					$inputDiv.append($input);
 				}
+				obj.input($input);
 				if (obj.helpText()) {
 					var helpBlock = $("<span/>");
 					helpBlock.addClass("help-block");
