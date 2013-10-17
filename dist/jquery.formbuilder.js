@@ -21,52 +21,6 @@
 			console.log("debug: " + msg);
 		}
 	}
-
-	(function addValidateMethods() {
-		//全角ひらがなのみ
-		$.validator.addMethod("hiragana", function(value, element) {
-			return this.optional(element) || /^([ぁ-んー]+)$/.test(value);
-		}, "Please enter only Hiragana.");
-
-		//全角カタカナのみ
-		$.validator.addMethod("katakana", function(value, element) {
-			return this.optional(element) || /^([ァ-ヶー]+)$/.test(value);
-		}, "Please enter only Katakana.");
-
-		//半角カタカナのみ
-		$.validator.addMethod("hankana", function(value, element) {
-			return this.optional(element) || /^([ｧ-ﾝﾞﾟ]+)$/.test(value);
-		}, "Please enter only hankaku kana.");
-
-		//半角アルファベット（大文字･小文字）のみ
-		$.validator.addMethod("alpha", function(value, element) {
-			return this.optional(element) || /^([a-zA-z¥s]+)$/.test(value);
-		}, "Please enter only alphabet.");
-
-		//半角アルファベット（大文字･小文字）もしくは数字のみ
-		$.validator.addMethod("alphanum", function(value, element) {
-			return this.optional(element) || /^([a-zA-Z0-9]+)$/.test(value);
-		}, "Please enter only alphabet or number.");
-		
-		//郵便番号（例:012-3456）
-		$.validator.addMethod("postcode", function(value, element) {
-			return this.optional(element) || /^¥d{3}¥-¥d{4}$/.test(value);
-		}, "Please enter a valid postcode.");
-
-		//電話番号（例:010-2345-6789）
-		$.validator.addMethod("tel", function(value, element) {
-			return this.optional(element) || /^[0-9-]{10,13}$/.test(value);
-		}, "Please enter a valid telephone number.");
-		
-		//正規表現
-		$.validator.addMethod("regexp", function(value, element, param) {
-			return this.optional(element) || new RegExp(param).test(value);
-		}, "Please enter \"{0}\" format.");
-		
-		//複数項目のいずれかが必須
-		$.validator.messages.requiredOne = "At least onf of {0} is required.";
-	})();
-
 	function Evaluator(context) {
 		function evaluateError(obj) {
 			throw "Invalid definition: " + JSON.stringify(obj);
@@ -266,7 +220,6 @@
 	$.fn.formbuilder = function(options, resources) {
 		var $form = $(this).addClass("formbuilder-form"),
 			$fieldset = $("<fieldset/>"),
-			$ul = $("<ul/>"),
 			rules = {},
 			idPrefix = options.idPrefix || "",
 			validateOptions = $.extend(true, {
@@ -274,27 +227,16 @@
 			}, options.validateOptions),
 			validator = null;
 		
-		if (options.debug) {
-			debugMode = true;
-		}
-		if (!validateOptions.errorPlacement) {
-			validateOptions.errorPlacement = errorPlacement;
-		}
-		if (options.title) {
-			$("<legend/>").text(options.title).appendTo($fieldset);
-		}
-		if (options.bootstrap != 3) {
-			$fieldset.append($ul);
-		}
-		$form.prepend($fieldset);
-		
 		//Context for user defined function
 		var context = {
+			getInput: function(name) {
+				return $form.find(":input[name=" + name + "]");
+			},
 			getId: function(name) {
-				return $form.find(":input[name=" + name + "]").attr("id");
+				return this.getInput(name).attr("id");
 			},
 			getValue: function(name) {
-				var $input = $form.find(":input[name=" + name + "]");
+				var $input = this.getInput(name);
 				if ($input.length == 0) {
 					return null;
 				}
@@ -343,6 +285,45 @@
 				return ret;
 			}
 		};
+		
+		if (options.debug) {
+			debugMode = true;
+		}
+		if (!validateOptions.errorPlacement) {
+			validateOptions.errorPlacement = errorPlacement;
+		}
+		if (!validateOptions.success) {
+			validateOptions.success = success;
+		}
+		if (options.title) {
+			$("<legend/>").text(options.title).appendTo($fieldset);
+		}
+		$form.prepend($fieldset);
+		if (isBootstrap3()) {
+			buildFormBS3();
+		} else {
+			buildFormNormal();
+		}
+		$.each(options.items, applyRules);
+		
+		if (options.rules) {
+			$.each(options.rules, buildRelationalRules);
+		}
+		if ($.fn.validate && rules) {
+			if (options.disableImmediateCheck) {
+				validateOptions.onfocusout = false;
+				validateOptions.onkeyup = false;
+				validateOptions.onclick = false;
+			}
+			validateOptions.rules = rules;
+			debug("validateOptions: ", validateOptions);
+			validator = $form.validate(validateOptions);
+		}
+		return new FormBuilder($form);
+		
+		function isBootstrap3() {
+			return $.fn.bootstrap3form;
+		}
 		function getValidateOptionsHolder(key) {
 			if (!validateOptions[key]) {
 				validateOptions[key] = {};
@@ -444,21 +425,31 @@
 					return false;
 			}
 		}
-		
+		function success(label, element) {
+			if (isBootstrap3()) {
+				$(element).parents(".form-group").removeClass("has-error");
+			} 
+		}
 		function errorPlacement(label, element) {
-			var li = element.parents("li").get(0);
-			try {
-				if (options.errorBreak) {
-					var w = $(li).find("label:first").outerWidth() + 10;
-					$(label).css({
-						"display": "block",
-						"padding-left" : w
-					});
+			if (isBootstrap3()) {
+				var helpBlock = $fieldset.find(".help-block[data-for=" + element.attr("name") + "]");
+				element.parents(".form-group").addClass("has-error");
+				helpBlock.append(label);
+			} else {
+				var li = element.parents("li").get(0);
+				try {
+					if (options.errorBreak) {
+						var w = $(li).find("label:first").outerWidth() + 10;
+						$(label).css({
+							"display": "block",
+							"padding-left" : w
+						});
+					}
+				} catch (e) {
+					console.log(e);
 				}
-			} catch (e) {
-				console.log(e);
+				$(li).append(label);
 			}
-			$(li).append(label);
 		}
 		function addValidateMessage(key, name, msg) {
 			debug("addValidateMessage: key=" + key + ", name=" + name + ", msg=", msg);
@@ -468,6 +459,11 @@
 			validateOptions.messages[key][name] = msg;
 		}
 		function normalizeItem(key, values) {
+			if (typeof(values) === "string") {
+				values = {
+					type : values
+				}
+			}
 			if (!values.label) {
 				values.label = key;
 			}
@@ -487,7 +483,12 @@
 					delete values[prop];
 				}
 			}
+			if (values.values) {
+				var selected = values.selected || values.checked;
+				normalizeOptions(values.values, values.type == "select" ? "selected" : "checked", selected);
+			}
 			normalizeRules(key, values.rules);
+			return values;
 		}
 		function normalizeRules(key, rules) {
 			$.each(rules, function(name, value) {
@@ -531,8 +532,11 @@
 				}
 			}
 		}
-		function normalizeOptions(options) {
-			var ret = [];
+		function normalizeOptions(options, selectedKey, selected) {
+			var array = null;
+			if (selected) {
+				array = ("" + selected).split(",");
+			}
 			for (var i=0; i<options.length; i++) {
 				var op = options[i];
 				
@@ -540,7 +544,6 @@
 					if (!op.text) {
 						op.text = op.value;
 					}
-					ret.push(op);
 				} else {
 					op = "" + op;
 					var idx = op.indexOf(":"),
@@ -553,28 +556,18 @@
 						value = op.substring(0, idx);
 						text = op.substring(idx+1);
 					}
-					ret.push({
+					op = {
 						value: value,
 						text: text
-					});
+					};
 				}
+				if (array != null && $.inArray(op.value, array) != -1) {
+					op[selectedKey] = true;
+				}
+				options[i] = op;
 			}
-			return ret;
-		}
-		function setSelected($el, values, attr) {
-			var array = ("" + values).split(",");
-			$el.each(function() {
-				var value = $(this).attr("value");
-				for (var i=0; i<array.length; i++) {
-					if (value == array[i]) {
-						$(this).attr(attr, attr);
-						break;
-					}
-				}
-			});
 		}
 		function buildSelect($select, options) {
-			options = normalizeOptions(options);
 			var $group = null;
 			for (var i=0; i<options.length; i++) {
 				var op = options[i],
@@ -602,62 +595,33 @@
 			}
 		}
 		function buildCheckboxOrRadio(key, type, values) {
-			values = normalizeOptions(values);
-			if (options.bootstrap == 3) {
-				var $dummy = $("<div></div>");
-				for (var i=0; i<values.length; i++) {
-					var op = values[i],
-						$input = $("<input/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key) + "-" + op.value,
-						type : type,
-						value : op.value
-					});
-					if (op.checked) {
-						$input.attr("checked", "checked");
-					}
-					if (op.disabled) {
-						$input.attr("disabled", "disabled");
-					}
+			var $span = $("<span style='display:inline-block;'/>");
+			for (var i=0; i<values.length; i++) {
+				var op = values[i],
+					$input = $("<input/>");
+				$input.attr({
+					name: key,
+					id: getId("input", key) + "-" + op.value,
+					type : type,
+					value : op.value
+				});
+				if (op.checked) {
+					$input.attr("checked", "checked");
+				}
+				if (op.disabled) {
+					$input.attr("disabled", "disabled");
+				}
+				if (op["break"]) {
+					$span.append("<br/>");
+				}
+				$span.append($input);
+				if (op.text) {
 					var $label = $("<label/>");
-					if (op.text) {
-						$label.html(op.text);
-					}
-					$label.prepend($input);
-					$label.addClass(type + "-inline");
-					$dummy.append($label);
+					$label.html(op.text);
+					$span.append($label);
 				}
-				return $dummy.find("label");
-			} else {
-				var $span = $("<span style='display:inline-block;'/>");
-				for (var i=0; i<values.length; i++) {
-					var op = values[i],
-						$input = $("<input/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key) + "-" + op.value,
-						type : type,
-						value : op.value
-					});
-					if (op.checked) {
-						$input.attr("checked", "checked");
-					}
-					if (op.disabled) {
-						$input.attr("disabled", "disabled");
-					}
-					if (op["break"]) {
-						$span.append("<br/>");
-					}
-					$span.append($input);
-					if (op.text) {
-						var $label = $("<label/>");
-						$label.html(op.text);
-						$span.append($label);
-					}
-				}
-				return $span;
 			}
+			return $span;
 		}
 		function setAttrs($input, attrs) {
 			for (var prop in attrs) {
@@ -674,128 +638,176 @@
 				$input.tooltip();
 			}
 		}
-		function buildForm(key, values) {
-			if (typeof(values) === "string") {
-				values = {
-					type : values
+		function buildFormBS3() {
+			var idPrefix = "input-",
+				properties = {
+					"horizontal" : !options.labelBreak,
+					"idPrefix" : idPrefix,
+					"labelSize" : 2,
+					"gridSize" : "sm"
+				},
+				bs3form = $fieldset.bootstrap3form(properties);
+			if (options.idPrefix) {
+				idPrefix = options.idPrefix + "-" + idPrefix;
+			}
+			$.each(options.items, function(key, values) {
+				values = normalizeItem(key, values);
+				var type = values.type,
+					label = values.label,
+					attrs = values.attrs,
+					size = 0;
+				
+				if (resources && resources[values.label]) {
+					label = resources[values.label];
 				}
-			}
-			normalizeItem(key, values);
-			var type = values.type,
-				$input = null,
-				$target = null;
-			
-			switch (type) {
-				case "text":
-				case "password":
-				case "hidden":
-				case "file":
-					$input = $("<input/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key),
-						type: type
+				if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
+					label += options.requiredAppendix;
+				}
+				if (options.helpImage && values.helpText) {
+					var $helpImage = $("<div><img class='form-help-img'/></div>");
+					$helpImage.find("img").attr({
+						"src" : options.helpImage,
+						"title" : values.helpText
 					})
-					setAttrs($input, values.attrs);
-					break;
-				case "date":
-					$input = $("<input/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key),
-						type: "text"
-					})
-					setAttrs($input, values.attrs);
-					var dateOptions = {
-						dateFormat: options.dateFormat || defaults.dateFormat,
-						onSelect: function() {
-							if (validator) {
-								validator.element("#" + context.getId(key));
-							}
+					label += $helpImage.html();
+				}
+				if (attrs && attrs.size) {
+					size = attrs.size;
+					delete attrs.size;
+				}
+				if (attrs && attrs.cols) {
+					size = attrs.cols;
+					delete attrs.cols;
+				}
+				switch (type) {
+					case "text":
+					case "password":
+					case "file":
+					case "date":
+						bs3form.addInput(key, type == "date" ? "text" : type, label, {
+							"size" : size,
+							"follow" : values.follow,
+							"helpText" : " ",
+							"attr" : attrs
+						});
+						break;
+					case "hidden":
+						var hidden = $("<input type='hidden'/>");
+						hidden.attr({
+							"name" : key,
+							"id" : idPrefix + key
+						});
+						$fieldset.append(hidden);
+						break;
+					case "checkbox":
+					case "radio":
+						if (!values.values) {
+							values.values = [{ "value" : "true", "text" : ""}];
 						}
-					}
-					if (values.rules.min) {
-						dateOptions.minDate = values.rules.min;
-					}
-					if (values.rules.max) {
-						dateOptions.maxDate = values.rules.max;
-					}
-					
-					$input.datepicker(dateOptions);
-					values.rules.date = true;
-					break;
-				case "checkbox":
-				case "radio":
-					if (!values.values) {
-						values.values = ["true:"];
-					}
-					$target = buildCheckboxOrRadio(key, type, values.values);
-					$input = $target.find("input");
-					setAttrs($input, values.attrs);
-					if (values.checked) {
-						setSelected($input, values.checked, "checked");
-					}
-					break;
-				case "select":
-					$input = $("<select/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key)
-					});
-					setAttrs($input, values.attrs);
-					buildSelect($input, values.values);
-					if (values.selected) {
-						setSelected($input.find("option"), values.selected, "selected");
-					}
-					break;
-				case "textarea":
-					$input = $("<textarea/>");
-					$input.attr({
-						name: key,
-						id: getId("input", key)
-					})
-					setAttrs($input, values.attrs);
-					break;
-				case "group":
-					var $group = $("<li><label class='formbuilder-label-group'></label></li>");
-					$group.find("label").html(values.label);
-					$ul.append($group);
-					break;
-				default:
-					error("unknown type: " + key + ", " + type);
-					break;
-			}
-			if ($input) {
-				$input.addClass("formbuilder-input");
-				var $label = $("<label/>");
-				if (options.bootstrap == 3) {
-					var $formGroup = $("<div></div>");
-					if (type == "radio" || type == "checkbox") {
-						$formGroup.addClass("form-group");
-					} else {
-						$formGroup.addClass("form-group");
-						$input.addClass("form-control");
-					}
-					
-					$formGroup.append($label);
-					if (options.labelBreak) {
-						$formGroup.append($target ? $target : $input);
-					} else {
-						var $inputDiv = $("<div></div>");
-						$inputDiv.append($target ? $target : $input);
-						$label.addClass("control-label");
-						$formGroup.append($inputDiv);
-						if (options.labelWidth) {
-							var w = parseInt(options.labelWidth);
-							if (isNaN(w) || w > 6) {
-								w = 3;
-							}
-							$label.addClass("col-sm-" + w);
-							$inputDiv.addClass("col-sm-" + (12 - w));
+						if (type == "checkbox") {
+							bs3form.addCheckbox(key, label, values.values, {
+								"size" : size,
+								"helpText" : " ",
+								"attr" : attrs
+							});
+						} else {
+							bs3form.addRadio(key, label, values.values, {
+								"size" : size,
+								"helpText" : " ",
+								"attr" : attrs
+							});
 						}
-					}
-					$fieldset.append($formGroup);
-				} else {
+						break;
+					case "select":
+						bs3form.addSelect(key, label, values.values, {
+							"size" : size,
+							"follow" : values.follw,
+							"helpText" : " ",
+							"attr" : attrs
+						});
+						break;
+					case "textarea":
+						bs3form.addTextarea(key, label, 5, {
+							"size" : size,
+							"follow" : values.follw,
+							"helpText" : " ",
+							"attr" : attrs
+						});
+						break;
+					case "group":
+						bs3form.addStatic(label, "");
+						break;
+					default:
+						error("unknown type: " + key + ", " + type);
+						break;
+				}
+				if (options.helpImage) {
+					$fieldset.find(".form-help-img").tooltip();
+				}
+			});
+			bs3form.generate();
+		}
+		function buildFormNormal() {
+			var $ul = $("<ul/>");
+			$fieldset.append($ul);
+			$.each(options.items, function(key, values) {
+				values = normalizeItem(key, values);
+				var type = values.type,
+					$input = null,
+					$target = null;
+				
+				switch (type) {
+					case "text":
+					case "password":
+					case "hidden":
+					case "file":
+					case "date":
+						$input = $("<input/>");
+						$input.attr({
+							name: key,
+							id: getId("input", key),
+							type: type == "date" ? "text" : type
+						})
+						setAttrs($input, values.attrs);
+						break;
+					case "checkbox":
+					case "radio":
+						if (!values.values) {
+							values.values = [{ "value" : "true", "text" : ""}];
+						}
+						$target = buildCheckboxOrRadio(key, type, values.values);
+						$input = $target.find("input");
+						setAttrs($input, values.attrs);
+						break;
+					case "select":
+						$input = $("<select/>");
+						$input.attr({
+							name: key,
+							id: getId("input", key)
+						});
+						setAttrs($input, values.attrs);
+						buildSelect($input, values.values);
+						break;
+					case "textarea":
+						$input = $("<textarea/>");
+						$input.attr({
+							name: key,
+							id: getId("input", key)
+						})
+						setAttrs($input, values.attrs);
+						break;
+					case "group":
+						var $group = $("<li><label class='formbuilder-label-group'></label></li>");
+						$group.find("label").html(values.label);
+						$ul.append($group);
+						break;
+					default:
+						error("unknown type: " + key + ", " + type);
+						break;
+				}
+				if ($input) {
+					$input.addClass("formbuilder-input");
+					var $label = $("<label/>");
 					var $li = null;
 					if (values.follow) {
 						$li = $form.find("li:last");
@@ -816,38 +828,32 @@
 					if (options.labelWidth) {
 						$label.css("width", options.labelWidth);
 					}
-				}
-				if (values.width) {
-					$input.css("width", values.width);
-				}
-				if (resources && resources[values.label]) {
-					$label.html(resources[values.label]);
-				} else {
-					$label.html(values.label);
-				}
-				if ($input.length == 1) {
-					$label.attr("for", $input.attr("id"));
-				}
-				if (values.rules && !$.isEmptyObject(values.rules)) {
-					rules[key] = values.rules;
-				}
-				if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
-					$label.append(options.requiredAppendix);
-				}
-				if (options.helpImage && values.helpText) {
-					var $helpImage = $("<img class='form-help-img'/>");
-					$helpImage.attr({
-						"src" : options.helpImage,
-						"title" : values.helpText
-					});
-					$label.append($helpImage);
-					$helpImage.tooltip();
-				}
-				if (values.follow) {
-					var group = getValidateOptionsHolder("groups"),
-						gname = "",
-						gvalue = "";
-					if (options.bootstrap != 3) {
+					if (values.width) {
+						$input.css("width", values.width);
+					}
+					if (resources && resources[values.label]) {
+						$label.html(resources[values.label]);
+					} else {
+						$label.html(values.label);
+					}
+					if ($input.length == 1) {
+						$label.attr("for", $input.attr("id"));
+					}
+					if (options.requiredAppendix && values.rules && values.rules.required && typeof(values.rules.required) == "boolean") {
+						$label.append(options.requiredAppendix);
+					}
+					if (options.helpImage && values.helpText) {
+						var $helpImage = $("<img class='form-help-img'/>");
+						$helpImage.attr({
+							"src" : options.helpImage,
+							"title" : values.helpText
+						});
+						$label.append($helpImage);
+					}
+					if (values.follow) {
+						var group = getValidateOptionsHolder("groups"),
+							gname = "",
+							gvalue = "";
 						$li.find(":input").each(function() {
 							if (gname.length > 0) {
 								gname += "_";
@@ -857,9 +863,38 @@
 							gname += name;
 							gvalue += name;
 						});
+						group[gname] = gvalue;
 					}
-					group[gname] = gvalue;
 				}
+			});
+		}
+		function applyRules(key, values) {
+			var $input = context.getInput(key);
+			if (values.type == "date") {
+				var dateOptions = {
+					dateFormat: options.dateFormat || defaults.dateFormat,
+					onSelect: function() {
+						if (validator) {
+							validator.element("#" + context.getId(key));
+						}
+					}
+				}
+				if (values.rules.min) {
+					dateOptions.minDate = values.rules.min;
+				}
+				if (values.rules.max) {
+					dateOptions.maxDate = values.rules.max;
+				}
+				
+				$input.datepicker(dateOptions);
+				values.rules.date = true;
+			}
+			if (values.rules && !$.isEmptyObject(values.rules)) {
+				rules[key] = values.rules;
+			}
+			if (options.helpImage && values.helpText) {
+				var $helpImage = $fieldset.find("label[for=" + $input.attr("id") + "]").find("img");;
+				$helpImage.tooltip();
 			}
 		}
 		function requiredOne(names) {
@@ -927,23 +962,6 @@
 					}
 			}
 		}
-		if (options.items) {
-			$.each(options.items, buildForm);
-		}
-		if (options.rules) {
-			$.each(options.rules, buildRelationalRules);
-		}
-		if ($.fn.validate && rules) {
-			if (options.disableImmediateCheck) {
-				validateOptions.onfocusout = false;
-				validateOptions.onkeyup = false;
-				validateOptions.onclick = false;
-			}
-			validateOptions.rules = rules;
-			debug("validateOptions: ", validateOptions);
-			validator = $form.validate(validateOptions);
-		}
-		return new FormBuilder($form);
 	}
 	function FormBuilder($form) {
 		$.extend(this, {
